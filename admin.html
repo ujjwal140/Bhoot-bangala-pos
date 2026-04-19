@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bhoot Bangla | Secure Admin Pro</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background-color: #050505; color: #eee; overflow-x: hidden; }
+        
+        /* SECURITY GATE */
+        #loginGate { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .lock-box { background: #111; border-top: 3px solid #ff1a1a; padding: 40px; border-radius: 12px; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(255, 0, 0, 0.2); }
+        .pin-input { width: 100%; padding: 15px; margin: 20px 0; background: #0a0a0a; border: 1px solid #333; color: #fff; text-align: center; font-size: 24px; letter-spacing: 10px; border-radius: 8px; outline: none; }
+        
+        #mainApp { display: none; }
+        
+        .sidebar { position: fixed; width: 220px; height: 100vh; background: #0a0a0a; border-right: 1px solid #222; padding: 20px; z-index: 10; }
+        .main-content { margin-left: 220px; padding: 30px; }
+        .tab-btn { display: block; width: 100%; padding: 12px; margin-bottom: 10px; background: transparent; color: #888; border: none; text-align: left; cursor: pointer; font-weight: bold; border-radius: 8px; transition: 0.3s; }
+        .tab-btn.active { background: #1a1a1a; color: #ff1a1a; border-left: 4px solid #ff1a1a; }
+        
+        .form-card { background: #111; padding: 20px; border-radius: 12px; border: 1px solid #333; margin-bottom: 20px; }
+        input, textarea, select { width: 100%; padding: 12px; background: #000; border: 1px solid #222; color: #fff; border-radius: 6px; margin-bottom: 15px; outline: none; }
+        .save-btn { background: #ff1a1a; color: #fff; border: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .save-btn:active { transform: scale(0.95); }
+        
+        .order-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: #151515; border-radius: 12px; padding: 15px; border: 1px solid #222; transition: 0.3s; }
+        .card.paid { border-color: #2e7d32; }
+        .discount-btn { background: #2a2a00; color: #ffeb3b; border: 1px solid #ffeb3b; padding: 8px; border-radius: 6px; font-size: 11px; cursor: pointer; margin-bottom: 12px; width: 100%; font-weight: bold; }
+        
+        .admin-item-card { background: #111; border: 1px solid #222; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .cat-tag { font-size: 10px; background: #222; padding: 4px 8px; border-radius: 4px; color: #ff1a1a; text-transform: uppercase; border: 1px solid #400; display: inline-block; margin-right: 5px; margin-bottom: 5px; }
+        
+        @media (max-width: 600px) { .sidebar { width: 100%; height: auto; position: relative; display: flex; overflow-x: auto; padding: 10px; } .main-content { margin-left: 0; padding: 15px; } .tab-btn { white-space: nowrap; margin-bottom: 0; margin-right: 10px; } }
+    </style>
+</head>
+<body>
+
+<div id="loginGate">
+    <div class="lock-box">
+        <h2 style="color:#ff1a1a; letter-spacing: 2px;">ADMIN VAULT</h2>
+        <input type="password" id="adminPin" class="pin-input" placeholder="••••" maxlength="4">
+        <button class="save-btn" style="width:100%" onclick="checkPin()">UNLOCK SYSTEM</button>
+    </div>
+</div>
+
+<div id="mainApp">
+    <div class="sidebar">
+        <h2 style="color:#ff1a1a; margin-bottom:20px; font-size: 18px; letter-spacing: 1px;">BH-B DASH</h2>
+        <button class="tab-btn active" onclick="showTab('ordersTab')">Live Orders</button>
+        <button class="tab-btn" onclick="showTab('menuTab')">Manage Menu</button>
+        <button class="tab-btn" onclick="showTab('analyticsTab')">Sales Report</button>
+        <button id="alarmToggle" class="tab-btn" style="color:#ff4444; border: 1px solid #300; margin-top: 20px;" onclick="toggleAlarm()">🔇 Alarm OFF</button>
+        <button class="tab-btn" style="color:#666; margin-top: 50px;" onclick="location.reload()">🔒 LOCK SCREEN</button>
+    </div>
+
+    <div class="main-content">
+        
+        <div id="ordersTab">
+            <h1 style="margin-bottom:20px">Real-time Orders</h1>
+            <div class="order-grid" id="orderGrid"></div>
+        </div>
+
+        <div id="menuTab" style="display:none">
+            <h1 style="margin-bottom:20px">Inventory Control</h1>
+            
+            <div class="form-card" style="border-color: #ff1a1a;">
+                <h3>Manage Categories</h3>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <input type="text" id="newCatName" placeholder="New Category (e.g., Sandwiches)" style="margin-bottom:0;">
+                    <button class="save-btn" onclick="addCategory()">ADD</button>
+                </div>
+                <div id="activeCategories" style="margin-top:15px;"></div>
+            </div>
+
+            <div class="form-card">
+                <h3>Summon New Dish</h3><br>
+                <input type="text" id="itemName" placeholder="Dish Name">
+                <input type="number" id="itemPrice" placeholder="Price (₹)">
+                <select id="itemCat"><option>Loading Categories...</option></select>
+                <textarea id="itemDesc" placeholder="Description"></textarea>
+                <button class="save-btn" onclick="addDish()">ADD TO CLOUD</button>
+            </div>
+            <div id="adminMenuList"></div>
+        </div>
+
+        <div id="analyticsTab" style="display:none">
+            <h1>Business Report</h1><br>
+            <input type="date" id="reportDate" onchange="loadAnalytics()" style="width:220px">
+            <div style="display:flex; gap:20px; margin:20px 0;">
+                <div class="form-card" style="flex:1; border-color: #ff1a1a;"><h3>Total Revenue</h3><h2 id="totalRevenue">₹0</h2></div>
+                <div class="form-card" style="flex:1"><h3>Completed Orders</h3><h2 id="totalCompleted">0</h2></div>
+            </div>
+            <div id="historyGrid" class="order-grid"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SECRET_PIN = "0707";
+    function checkPin() {
+        if(document.getElementById('adminPin').value === SECRET_PIN) {
+            document.getElementById('loginGate').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            loadAnalytics();
+        } else { alert("WRONG PIN! Access Denied."); document.getElementById('adminPin').value = ''; }
+    }
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB8QGSysMPyI1EqQTCCEx-Z6W7iIrwoaIQ",
+      authDomain: "bhoot-bangla-41807.firebaseapp.com",
+      databaseURL: "https://bhoot-bangla-41807-default-rtdb.firebaseio.com",
+      projectId: "bhoot-bangla-41807",
+      storageBucket: "bhoot-bangla-41807.firebasestorage.app",
+      messagingSenderId: "1065037227059",
+      appId: "1:1065037227059:web:ce2c3bb59f773dcbcd2f46"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ALARM LOGIC
+    let alarmEnabled = false; let isAlarmRinging = false;
+    const alertSound = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
+    alertSound.loop = true; let prevOrderCount = 0; let firstLoad = true;
+
+    function toggleAlarm() {
+        alarmEnabled = !alarmEnabled;
+        const btn = document.getElementById('alarmToggle');
+        if(alarmEnabled) {
+            btn.innerText = "🔊 Alarm ACTIVE"; btn.style.color = "#4caf50"; btn.style.borderColor = "#1b3320";
+            alertSound.play(); setTimeout(() => { if(!isAlarmRinging) stopSound(); }, 1000);
+        } else {
+            btn.innerText = "🔇 Alarm OFF"; btn.style.color = "#ff4444"; btn.style.borderColor = "#300"; stopSound();
+        }
+    }
+    function stopSound() { alertSound.pause(); alertSound.currentTime = 0; isAlarmRinging = false; }
+
+    function showTab(id) {
+        ['ordersTab','menuTab','analyticsTab'].forEach(t => document.getElementById(t).style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        if(id === 'analyticsTab') loadAnalytics();
+    }
+
+    // LIVE ORDERS WITH WHATSAPP BILLING
+    db.ref('orders').on('value', snap => {
+        const grid = document.getElementById('orderGrid'); grid.innerHTML = '';
+        const data = snap.val();
+        let currentCount = data ? Object.keys(data).length : 0;
+        if(!firstLoad && currentCount > prevOrderCount && alarmEnabled) { isAlarmRinging = true; alertSound.play(); setTimeout(() => { stopSound(); }, 6000); }
+        prevOrderCount = currentCount; firstLoad = false;
+
+        if(!data) return grid.innerHTML = '<p style="color:#444">Waiting for orders...</p>';
+
+        for(let id in data) {
+            const o = data[id]; const isPaid = o.payment === "Paid"; const canDiscount = o.totalAmount >= 199;
+            grid.innerHTML += `
+                <div class="card ${isPaid ? 'paid' : ''}">
+                    <div style="color:#ff1a1a; font-weight:bold; font-size:18px">${o.table}</div>
+                    <div style="font-size:11px; color:#666; margin-bottom:10px">${o.time}</div>
+                    <div style="margin-bottom:15px; font-size:14px; color:#ccc">${o.items}</div>
+                    <div style="font-size:22px; font-weight:bold; margin-bottom:12px">₹${o.totalAmount}</div>
+                    ${canDiscount && !isPaid ? `<button class="discount-btn" onclick="applyDiscount('${id}', ${o.totalAmount})">APPLY 10% OFF (₹199+ Offer)</button>` : ''}
+                    <div style="display:flex; gap:10px">
+                        <button style="flex:1; background:#1b3320; color:#4caf50; border:none; padding:10px; border-radius:6px; font-weight:bold" onclick="db.ref('orders/${id}').update({payment:'Paid'})">${o.payment}</button>
+                        <button style="flex:1; background:#331111; color:#ff4444; border:none; padding:10px; border-radius:6px; font-weight:bold" onclick="completeOrder('${id}', '${o.table}', '${o.totalAmount}', '${o.items}')">DONE</button>
+                    </div>
+                </div>`;
+        }
+    });
+
+    function applyDiscount(id, currentTotal) {
+        const newTotal = Math.round(currentTotal * 0.9);
+        if(confirm("Apply 10% Discount? New Bill: ₹" + newTotal)) db.ref('orders/' + id).update({ totalAmount: newTotal });
+    }
+
+    // NEW WHATSAPP BILLING LOGIC
+    function completeOrder(id, table, amount, items) {
+        db.ref('orders/' + id).once('value').then(s => {
+            if(s.val().payment !== "Paid") return alert("⚠️ Pehle Payment mark karo!");
+            
+            // Ask for WhatsApp
+            let phone = prompt("Enter WhatsApp number for Bill (Leave blank to skip):");
+            if(phone !== null) {
+                if(phone.trim() !== "") {
+                    // Send WhatsApp Message
+                    let text = `☠️ You survived *Bhoot Bangla*!\n\nHere is your bill for *${table}*.\n*Items:* ${items}\n*Total:* ₹${amount}\n\nSee you in the dark again...`;
+                    let url = `https://wa.me/91${phone}?text=${encodeURIComponent(text)}`;
+                    window.open(url, '_blank');
+                }
+                // Save & Delete
+                const day = new Date().toISOString().split('T')[0];
+                db.ref('sales_history/' + day + '/' + id).set(s.val()).then(() => db.ref('orders/' + id).remove());
+            }
+        });
+    }
+
+    // --- DYNAMIC CATEGORY MANAGER ---
+    function addCategory() {
+        const cat = document.getElementById('newCatName').value;
+        if(cat) db.ref('categories').push({ name: cat }).then(()=> { document.getElementById('newCatName').value=''; });
+    }
+
+    db.ref('categories').on('value', snap => {
+        const data = snap.val();
+        const select = document.getElementById('itemCat');
+        const activeBoxes = document.getElementById('activeCategories');
+        select.innerHTML = ''; activeBoxes.innerHTML = '';
+        
+        if(data) {
+            for(let id in data) {
+                select.innerHTML += `<option value="${data[id].name}">${data[id].name}</option>`;
+                activeBoxes.innerHTML += `
+                    <span class="cat-tag">
+                        ${data[id].name} 
+                        <b style="cursor:pointer; color:#fff; margin-left:5px" onclick="db.ref('categories/${id}').remove()">×</b>
+                    </span>`;
+            }
+        } else {
+            select.innerHTML = '<option>No Categories Added</option>';
+            activeBoxes.innerHTML = '<small style="color:#666">Add your first category above...</small>';
+        }
+    });
+
+    function addDish() {
+        const name = document.getElementById('itemName').value; const price = document.getElementById('itemPrice').value;
+        const cat = document.getElementById('itemCat').value; const desc = document.getElementById('itemDesc').value;
+        if(!name || !price || cat === "No Categories Added") return alert("Name, Price aur ek Category zaruri hai!");
+        db.ref('menu_items').push({ name, price, cat, desc, status: 'In Stock' }).then(() => { alert("Dish Summoned!"); document.getElementById('itemName').value = ''; document.getElementById('itemPrice').value = ''; });
+    }
+
+    db.ref('menu_items').on('value', snap => {
+        const list = document.getElementById('adminMenuList'); list.innerHTML = ''; const data = snap.val();
+        for(let id in data) {
+            const item = data[id];
+            list.innerHTML += `
+                <div class="admin-item-card">
+                    <div><strong>${item.name}</strong> <span class="cat-tag">${item.cat}</span><br><small>₹${item.price}</small></div>
+                    <button onclick="if(confirm('Delete dish?')) db.ref('menu_items/${id}').remove()" style="background:none; border:none; cursor:pointer; font-size:18px">🗑️</button>
+                </div>`;
+        }
+    });
+
+    function loadAnalytics() {
+        let dateVal = document.getElementById('reportDate').value || new Date().toISOString().split('T')[0];
+        document.getElementById('reportDate').value = dateVal;
+        db.ref('sales_history/' + dateVal).on('value', snap => {
+            const grid = document.getElementById('historyGrid'); grid.innerHTML = ''; let rev = 0; let count = 0;
+            const data = snap.val();
+            if(!data) { document.getElementById('totalRevenue').innerText = "₹0"; document.getElementById('totalCompleted').innerText = "0"; return; }
+            for(let id in data) {
+                rev += parseInt(data[id].totalAmount); count++;
+                grid.innerHTML += `<div class="card" style="font-size:13px; border-color:#333"><b>${data[id].table}</b><br>${data[id].items}<br><b>₹${data[id].totalAmount}</b><br><small style="color:#4caf50">✅ Completed</small></div>`;
+            }
+            document.getElementById('totalRevenue').innerText = "₹" + rev; document.getElementById('totalCompleted').innerText = count;
+        });
+    }
+</script>
+</body>
+</html>

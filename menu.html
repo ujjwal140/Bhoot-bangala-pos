@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bhoot Bangla | Digital Menu</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+    <style>
+        body { background: #030000; color: #e0e0e0; font-family: 'Outfit', sans-serif; padding-bottom: 120px; }
+        .header { text-align: center; padding: 40px; background: linear-gradient(180deg, #110000 0%, #000 100%); }
+        .header h1 { font-family: 'Cinzel', serif; color: #ff1a1a; letter-spacing: 5px; font-size: 35px; }
+        
+        .cat-section { margin-top: 30px; padding: 0 20px; }
+        .cat-title { font-family: 'Cinzel', serif; color: #ff1a1a; font-size: 20px; border-bottom: 1px solid #300; padding-bottom: 5px; margin-bottom: 15px; letter-spacing: 2px; text-transform: uppercase; }
+        
+        .menu-item { background: #0a0a0a; border: 1px solid #200; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-left: 3px solid #ff1a1a; }
+        .item-info h3 { font-size: 18px; margin-bottom: 4px; }
+        .item-info p { color: #ff1a1a; font-weight: bold; }
+        
+        .add-btn { background: transparent; color: #ff1a1a; border: 1px solid #ff1a1a; padding: 8px 15px; border-radius: 4px; font-weight: bold; }
+        .add-btn:active { background: #ff1a1a; color: #000; }
+        
+        .cart-bar { position: fixed; bottom: 0; width: 100%; background: rgba(5,0,0,0.95); backdrop-filter: blur(10px); padding: 20px; border-top: 2px solid #ff1a1a; z-index: 100; }
+        .summon-btn { width: 100%; background: #ff1a1a; color: #000; border: none; padding: 15px; border-radius: 4px; font-family: 'Cinzel', serif; font-weight: bold; font-size: 16px; margin-top: 10px; transition: 0.2s; }
+        
+        /* FEEDBACK MODAL */
+        #feedbackModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-box { background: #111; border: 1px solid #ff1a1a; padding: 30px; border-radius: 10px; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 0 30px rgba(255, 0, 0, 0.4); }
+        .skulls { font-size: 40px; margin: 20px 0; cursor: pointer; user-select: none; }
+        .skulls span { filter: grayscale(1); transition: 0.2s; }
+        .skulls span.active { filter: grayscale(0); text-shadow: 0 0 10px #fff; }
+    </style>
+</head>
+<body>
+
+    <div class="header"><h1>BHOOT BANGLA</h1><p style="font-size:10px; color:#444">DIGITAL SUMMONING</p></div>
+    <div id="menuContent"></div>
+
+    <div class="cart-bar" id="cart" style="display:none">
+        <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:18px">
+            <span>TOTAL: ₹<span id="totalAmt">0</span></span>
+            <span id="tableDisplay" style="color:#ff1a1a"></span>
+        </div>
+        <button class="summon-btn" onclick="summonOrder()">SUMMON THE FEAST</button>
+    </div>
+
+    <div id="feedbackModal">
+        <div class="modal-box">
+            <h2 style="font-family:'Cinzel', serif; color:#ff1a1a; letter-spacing:2px">RATE YOUR NIGHTMARE</h2>
+            <p style="color:#888; font-size:12px; margin-top:10px">The souls demand your feedback...</p>
+            <div class="skulls" id="skullBox">
+                <span onclick="rate(1)">💀</span><span onclick="rate(2)">💀</span><span onclick="rate(3)">💀</span><span onclick="rate(4)">💀</span><span onclick="rate(5)">💀</span>
+            </div>
+            <button class="summon-btn" onclick="submitFeedback()">SUBMIT SOUL</button>
+        </div>
+    </div>
+
+<script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB8QGSysMPyI1EqQTCCEx-Z6W7iIrwoaIQ",
+      authDomain: "bhoot-bangla-41807.firebaseapp.com",
+      databaseURL: "https://bhoot-bangla-41807-default-rtdb.firebaseio.com",
+      projectId: "bhoot-bangla-41807",
+      storageBucket: "bhoot-bangla-41807.firebasestorage.app",
+      messagingSenderId: "1065037227059",
+      appId: "1:1065037227059:web:ce2c3bb59f773dcbcd2f46"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const table = new URLSearchParams(window.location.search).get('table');
+    document.getElementById('tableDisplay').innerText = table ? "TABLE " + table : "SCAN QR";
+
+    let cartTotal = 0; 
+    let cartItems = {}; // NAYA LOGIC: Array ki jagah Object use kar rahe hain grouping ke liye
+    let currentRating = 0;
+
+    // DYNAMIC MENU RENDERING
+    db.ref('menu_items').on('value', snap => {
+        const content = document.getElementById('menuContent');
+        const data = snap.val();
+        content.innerHTML = '';
+        if(!data) return;
+
+        const categories = {};
+        for(let id in data) {
+            const cat = data[id].cat || "Other";
+            if(!categories[cat]) categories[cat] = [];
+            categories[cat].push(data[id]);
+        }
+
+        for(let catName in categories) {
+            let section = `<div class="cat-section"><h2 class="cat-title">${catName}</h2>`;
+            categories[catName].forEach(item => {
+                section += `
+                    <div class="menu-item">
+                        <div class="item-info"><h3>${item.name}</h3><p>₹${item.price}</p><small style="color:#666">${item.desc || ''}</small></div>
+                        <button class="add-btn" onclick="addToCart('${item.name}', ${item.price})">ADD</button>
+                    </div>`;
+            });
+            section += `</div>`;
+            content.innerHTML += section;
+        }
+    });
+
+    function addToCart(n, p) {
+        // NAYA MULTIPLIER LOGIC
+        if(cartItems[n]) {
+            cartItems[n]++; // Agar pehle se hai toh quantity badhao
+        } else {
+            cartItems[n] = 1; // Naya item hai toh 1 set karo
+        }
+        
+        cartTotal += parseInt(p);
+        document.getElementById('totalAmt').innerText = cartTotal;
+        document.getElementById('cart').style.display = 'block';
+        if(navigator.vibrate) navigator.vibrate(40); // Vivo phone tap vibration
+    }
+
+    function summonOrder() {
+        if(!table) return alert("Pehle Table QR scan karo!");
+        let btn = document.querySelector('.summon-btn');
+        btn.innerText = "SUMMONING...";
+
+        // CONVERT OBJECT TO STRING (e.g., "Demon Burger x2, Coke x1")
+        let formattedItems = Object.keys(cartItems).map(key => `${key} x${cartItems[key]}`).join(", ");
+
+        db.ref('orders').push({
+            table: "Table " + table, 
+            items: formattedItems, // Updated clean items list
+            totalAmount: cartTotal, 
+            time: new Date().toLocaleTimeString(), 
+            payment: 'Unpaid'
+        }).then(() => { 
+            document.getElementById('cart').style.display = 'none';
+            document.getElementById('feedbackModal').style.display = 'flex';
+        });
+    }
+
+    // FEEDBACK LOGIC
+    function rate(num) {
+        currentRating = num;
+        const skulls = document.getElementById('skullBox').children;
+        for(let i=0; i<5; i++) {
+            if(i < num) skulls[i].classList.add('active');
+            else skulls[i].classList.remove('active');
+        }
+        if(navigator.vibrate) navigator.vibrate(20);
+    }
+
+    function submitFeedback() {
+        if(currentRating === 0) return alert("Please select skulls to rate!");
+        db.ref('feedback').push({ rating: currentRating, time: new Date().toLocaleString() }).then(() => {
+            if(currentRating === 5) {
+                alert("Thank you for 5 Skulls! 💀");
+            }
+            location.reload(); 
+        });
+    }
+</script>
+</body>
+</html>
