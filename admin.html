@@ -27,7 +27,7 @@
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
         
         .card { background: #0d0505; border: 1px solid #300; padding: 20px; border-radius: 12px; border-left: 4px solid #ff1a1a; transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(255,26,26,0.15); } /* Laptop hover effect */
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(255,26,26,0.15); } 
         .card.paid { border-left-color: #4caf50; opacity: 0.85; }
         .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 10px; margin-bottom: 10px; }
         .card-title { color: #ff1a1a; font-weight: bold; font-size: 22px; font-family: 'Cinzel', serif; }
@@ -45,15 +45,21 @@
         .btn-done:hover { background: #ff4444; color: #fff; }
         
         /* Pro Analytics Layout */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-box { background: #0a0a0a; padding: 30px; border-radius: 12px; border: 1px solid #333; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-box { background: #0a0a0a; padding: 25px; border-radius: 12px; border: 1px solid #333; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
         .history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
         .history-card { background: #0a0a0a; border: 1px solid #222; padding: 18px; border-radius: 8px; border-left: 3px solid #4caf50; transition: 0.2s; }
         .history-card:hover { border-color: #444; background: #111; transform: translateY(-2px); }
 
+        .filter-bar { display: flex; justify-content: space-between; align-items: center; background: #111; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333; }
+        .filter-bar input[type="date"] { background: #000; color: #fff; border: 1px solid #555; padding: 10px; border-radius: 6px; font-family: 'Outfit', sans-serif; font-size: 15px; outline: none; }
+        .filter-bar input[type="date"]:focus { border-color: #ff1a1a; }
+        .clear-btn { background: transparent; border: 1px solid #ff4444; color: #ff4444; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .clear-btn:hover { background: #ff4444; color: #000; }
+
         /* Inventory Layout */
         .inventory-wrapper { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; align-items: start; }
-        @media (max-width: 768px) { .inventory-wrapper { grid-template-columns: 1fr; } .tabs { flex-wrap: wrap; } .tab-btn { flex: 1 1 100%; padding: 12px; } }
+        @media (max-width: 768px) { .inventory-wrapper { grid-template-columns: 1fr; } .tabs { flex-wrap: wrap; } .tab-btn { flex: 1 1 100%; padding: 12px; } .filter-bar { flex-direction: column; gap: 10px; align-items: stretch; } }
         
         .inventory-form { background: #0a0a0a; padding: 25px; border-radius: 10px; border: 1px solid #ff1a1a; position: sticky; top: 20px; }
         .inventory-form input { width: 100%; padding: 14px; margin-bottom: 15px; background: #000; border: 1px solid #444; color: #fff; border-radius: 6px; font-size: 15px; outline: none; }
@@ -98,18 +104,31 @@
         </div>
         
         <div id="analyticsTab" class="container" style="display:none;">
+            
+            <div class="filter-bar">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="color:#aaa; font-weight:bold;">Filter by Date:</span>
+                    <input type="date" id="dateFilter" onchange="loadAnalytics()">
+                </div>
+                <button class="clear-btn" onclick="clearFilter()">SHOW ALL-TIME</button>
+            </div>
+
             <div class="stats-grid">
                 <div class="stat-box">
-                    <h3 style="color:#aaa; letter-spacing:1px; font-size:14px;">TOTAL LIFETIME REVENUE</h3>
-                    <h1 id="totalRevenue" style="color:#4caf50; font-size:48px; margin-top:15px; font-family:'Outfit', sans-serif;">₹0</h1>
+                    <h3 style="color:#aaa; letter-spacing:1px; font-size:14px;">REVENUE</h3>
+                    <h1 id="totalRevenue" style="color:#4caf50; font-size:42px; margin-top:15px; font-family:'Outfit', sans-serif;">₹0</h1>
                 </div>
                 <div class="stat-box">
-                    <h3 style="color:#aaa; letter-spacing:1px; font-size:14px;">TOTAL ORDERS COMPLETED</h3>
-                    <h1 id="totalOrdersCount" style="color:#fff; font-size:48px; margin-top:15px; font-family:'Outfit', sans-serif;">0</h1>
+                    <h3 style="color:#aaa; letter-spacing:1px; font-size:14px;">ORDERS COMPLETED</h3>
+                    <h1 id="totalOrdersCount" style="color:#fff; font-size:42px; margin-top:15px; font-family:'Outfit', sans-serif;">0</h1>
+                </div>
+                <div class="stat-box" style="border-color: #ff1a1a;">
+                    <h3 style="color:#ff1a1a; letter-spacing:1px; font-size:14px;">👑 WINNING PRODUCT</h3>
+                    <h1 id="bestsellerItem" style="color:#ff1a1a; font-size:28px; margin-top:15px; font-family:'Outfit', sans-serif;">-</h1>
                 </div>
             </div>
             
-            <h3 style="color:#fff; font-family:'Cinzel', serif; margin-bottom:20px; border-bottom: 1px solid #333; padding-bottom:10px; font-size:22px;">Complete Order Record</h3>
+            <h3 style="color:#fff; font-family:'Cinzel', serif; margin-bottom:20px; border-bottom: 1px solid #333; padding-bottom:10px; font-size:22px;" id="ledgerTitle">Complete Order Record</h3>
             <div id="historyList" class="history-grid"></div>
         </div>
 
@@ -160,7 +179,7 @@
         const btn = document.getElementById('alarmToggle');
         if(alarmEnabled) {
             btn.innerText = "🔊 ALARM ACTIVE"; btn.style.color = "#4caf50"; btn.style.borderColor = "#4caf50";
-            alertSound.play(); setTimeout(() => { if(!isAlarmRinging) stopSound(); }, 1000);
+            alertSound.play(); setTimeout(() => { if(!isAlarmRinging) stopSound(); }, 6000);
         } else {
             btn.innerText = "🔇 ALARM OFF"; btn.style.color = "#ff4444"; btn.style.borderColor = "#ff4444"; stopSound();
         }
@@ -234,7 +253,6 @@
         db.ref('orders/' + id).once('value').then(s => {
             if(s.val().payment !== "Paid") return alert("⚠️ Payment must be marked 'Paid' first!");
             
-            // PUSH TO UNDELETABLE LEDGER
             db.ref('analytics').push({
                 table: table,
                 items: items,
@@ -252,78 +270,56 @@
         });
     }
 
-    // -- SECURE SALES HISTORY (TAB 2) --
+    // -- SECURE SALES HISTORY & ADVANCED ANALYTICS (TAB 2) --
+    function clearFilter() {
+        document.getElementById('dateFilter').value = '';
+        loadAnalytics();
+    }
+
     function loadAnalytics() {
         db.ref('analytics').once('value', s => {
             const data = s.val();
             let totalAmount = 0; 
             let totalOrders = 0;
             let html = '';
+            let itemCounts = {};
+
+            const selectedDate = document.getElementById('dateFilter').value; // format: YYYY-MM-DD
             
             if(data) {
                 const records = Object.values(data).sort((a,b) => b.timestamp - a.timestamp);
-                totalOrders = records.length;
+                
                 records.forEach(r => {
+                    // Date Filtering Logic
+                    let recordDate = "";
+                    if(r.timestamp) {
+                        const d = new Date(r.timestamp);
+                        recordDate = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
+                    }
+                    
+                    if(selectedDate && recordDate !== selectedDate) return; // Skip if date doesn't match
+
                     totalAmount += r.amount || 0;
+                    totalOrders++;
+
+                    // Winning Product Logic (Parsing items string)
+                    if(r.items) {
+                        const parts = r.items.split(', ');
+                        parts.forEach(p => {
+                            const match = p.match(/(.*) x(\d+)/);
+                            if(match) {
+                                const itemName = match[1];
+                                const qty = parseInt(match[2]);
+                                itemCounts[itemName] = (itemCounts[itemName] || 0) + qty;
+                            }
+                        });
+                    }
+
                     html += `
                         <div class="history-card">
                             <div style="display:flex; justify-content:space-between; color:#888; font-size:12px; margin-bottom:8px; border-bottom:1px solid #222; padding-bottom:5px;">
-                                <span>🕒 ${r.time || 'Unknown'}</span>
+                                <span>📅 ${recordDate} | 🕒 ${r.time || 'Unknown'}</span>
                                 <span style="color:#fff; font-weight:bold; font-family:'Cinzel', serif;">${r.table || 'Unknown'}</span>
                             </div>
                             <div style="color:#ccc; font-size:14px; margin-bottom:12px; line-height:1.4;">${r.items || 'No items saved'}</div>
-                            <div style="color:#4caf50; font-weight:bold; font-size:22px;">₹${r.amount || 0}</div>
-                        </div>`;
-                });
-            } else {
-                html = '<p style="color:#666; text-align:center; grid-column: 1 / -1; font-size: 18px; margin-top:30px;">No sales recorded yet. Your ledger is empty.</p>';
-            }
-            
-            document.getElementById('totalRevenue').innerText = '₹' + totalAmount;
-            document.getElementById('totalOrdersCount').innerText = totalOrders;
-            document.getElementById('historyList').innerHTML = html;
-        });
-    }
-
-    // -- INVENTORY MANAGER (TAB 3) --
-    function addMenuItem() {
-        const name = document.getElementById('iName').value.trim();
-        const price = document.getElementById('iPrice').value.trim();
-        const cat = document.getElementById('iCat').value.trim();
-        
-        if(!name || !price || !cat) return alert("Please fill all fields!");
-        
-        db.ref('menu_items').push({ name: name, price: price, cat: cat }).then(() => {
-            document.getElementById('iName').value = '';
-            document.getElementById('iPrice').value = '';
-            document.getElementById('iCat').value = '';
-            loadInventory();
-        });
-    }
-
-    function loadInventory() {
-        db.ref('menu_items').once('value', s => {
-            let html = '';
-            s.forEach(child => {
-                const item = child.val();
-                html += `
-                    <div class="inventory-item">
-                        <div>
-                            <div style="color:#fff; font-weight:bold; font-size:16px;">${item.name}</div>
-                            <div style="color:#aaa; font-size:13px; margin-top:5px;"><span style="color:#4caf50; font-weight:bold;">₹${item.price}</span> &nbsp;|&nbsp; ${item.cat}</div>
-                        </div>
-                        <button onclick="removeMenuItem('${child.key}')" style="background:transparent; border:1px solid #ff4444; color:#ff4444; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px; transition:0.2s;" onmouseover="this.style.background='#ff4444'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='#ff4444';">DELETE</button>
-                    </div>`;
-            });
-            document.getElementById('inventoryList').innerHTML = html || '<p style="color:#666;">No items in the menu.</p>';
-        });
-    }
-
-    function removeMenuItem(key) {
-        if(confirm("Are you sure you want to remove this item from the live menu?")) {
-            db.ref('menu_items/' + key).remove().then(() => loadInventory());
-        }
-    }
-</script>
-</body>
-</html>
+                            <div style="color:#4caf50; font-weight:bold; font-size:22px;">₹$
