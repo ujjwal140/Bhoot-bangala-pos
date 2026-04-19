@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -16,13 +16,11 @@
         .alarm-btn { background: #111; color: #ff4444; border: 1px solid #ff4444; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .alarm-btn:hover { background: rgba(255, 68, 68, 0.1); }
         
-        /* Premium Tabs */
         .tabs { display: flex; background: #0a0a0a; border-bottom: 1px solid #222; justify-content: center; }
         .tab-btn { padding: 18px 40px; background: transparent; color: #888; border: none; font-weight: bold; cursor: pointer; font-family: 'Cinzel', serif; font-size: 16px; transition: 0.3s; }
         .tab-btn:hover { color: #fff; }
         .tab-btn.active { color: #ff1a1a; border-bottom: 3px solid #ff1a1a; background: rgba(255,0,0,0.05); }
         
-        /* Laptop Optimized Grids */
         .container { padding: 30px; max-width: 1400px; margin: auto; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
         
@@ -44,7 +42,6 @@
         .btn-done { flex: 1; background: #330000; color: #ff4444; border: 1px solid #ff4444; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-done:hover { background: #ff4444; color: #fff; }
         
-        /* Pro Analytics Layout */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .stat-box { background: #0a0a0a; padding: 25px; border-radius: 12px; border: 1px solid #333; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
         .history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
@@ -57,7 +54,6 @@
         .clear-btn { background: transparent; border: 1px solid #ff4444; color: #ff4444; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .clear-btn:hover { background: #ff4444; color: #000; }
 
-        /* Inventory Layout */
         .inventory-wrapper { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; align-items: start; }
         @media (max-width: 768px) { .inventory-wrapper { grid-template-columns: 1fr; } .tabs { flex-wrap: wrap; } .tab-btn { flex: 1 1 100%; padding: 12px; } .filter-bar { flex-direction: column; gap: 10px; align-items: stretch; } }
         
@@ -69,7 +65,6 @@
         .inventory-item { display: flex; justify-content: space-between; background: #0a0a0a; padding: 18px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #222; align-items: center; transition: 0.2s; }
         .inventory-item:hover { border-color: #555; }
 
-        /* Security */
         #pinScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; }
         .pin-box { background: #0a0a0a; padding: 40px; border-radius: 12px; border: 1px solid #f00; text-align: center; box-shadow: 0 0 40px rgba(255,0,0,0.2); width: 90%; max-width: 400px; }
         .pin-box input { background: transparent; border: 2px solid #300; color: #fff; padding: 15px; font-size: 28px; text-align: center; width: 100%; margin: 20px 0; border-radius: 6px; letter-spacing: 10px; font-family: 'Cinzel', serif; outline: none; }
@@ -104,7 +99,6 @@
         </div>
         
         <div id="analyticsTab" class="container" style="display:none;">
-            
             <div class="filter-bar">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <span style="color:#aaa; font-weight:bold;">Filter by Date:</span>
@@ -169,7 +163,9 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // -- ALARM LOGIC --
+    // Global memory to prevent HTML string crash issues
+    let globalOrders = {};
+
     let alarmEnabled = false; let isAlarmRinging = false;
     const alertSound = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
     alertSound.loop = true; let prevOrderCount = 0; let firstLoad = true;
@@ -186,22 +182,20 @@
     }
     function stopSound() { alertSound.pause(); alertSound.currentTime = 0; isAlarmRinging = false; }
 
-    // -- TAB NAVIGATION --
     function showTab(id, e) {
         ['orderTab', 'analyticsTab', 'inventoryTab'].forEach(t => document.getElementById(t).style.display = 'none');
         document.getElementById(id).style.display = 'block';
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
-        
         if(id === 'analyticsTab') loadAnalytics();
         if(id === 'inventoryTab') loadInventory();
     }
 
-    // -- LIVE ORDERS (TAB 1) --
     db.ref('orders').on('value', snap => {
         const grid = document.getElementById('orderGrid');
         grid.innerHTML = '';
         const data = snap.val();
+        globalOrders = data || {}; 
         let currentCount = data ? Object.keys(data).length : 0;
 
         if(!firstLoad && currentCount > prevOrderCount && alarmEnabled) {
@@ -229,48 +223,53 @@
                     <div style="font-size:28px; font-weight:bold; color:#fff; margin-bottom:15px;">₹${displayTotal}</div>
                     
                     <div class="discount-box" style="display: ${showCheckbox ? 'flex' : 'none'}; opacity: ${isPaid ? '0.5' : '1'}">
-                        <input type="checkbox" id="chk-${id}" ${isDiscounted ? 'checked' : ''} ${isPaid ? 'disabled' : ''} onchange="toggleDiscount('${id}', ${o.totalAmount}, this)">
+                        <input type="checkbox" id="chk-${id}" ${isDiscounted ? 'checked' : ''} ${isPaid ? 'disabled' : ''} onchange="toggleDiscount('${id}', this)">
                         <label for="chk-${id}">Apply 10% OFF Magic</label>
                     </div>
                     
                     <div class="action-row">
                         <button class="btn-paid" onclick="markPaid('${id}')">${o.payment}</button>
-                        <button class="btn-done" onclick="completeOrder('${id}', '${o.table}', '${displayTotal}', '${o.items}', '${o.time}')">SEND BILL</button>
+                        <button class="btn-done" onclick="completeOrder('${id}')">SEND BILL</button>
                     </div>
                 </div>`;
         }
     });
 
-    function toggleDiscount(id, originalAmount, checkbox) {
-        const newTotal = checkbox.checked ? Math.round(originalAmount * 0.9) : null;
+    function toggleDiscount(id, checkbox) {
+        const o = globalOrders[id];
+        if(!o) return;
+        const newTotal = checkbox.checked ? Math.round(o.totalAmount * 0.9) : null;
         db.ref('orders/' + id).update({ discountedAmount: newTotal });
     }
 
     function cancelOrder(id) { if(confirm("Are you sure you want to delete this live order?")) db.ref('orders/' + id).remove(); }
     function markPaid(id) { db.ref('orders/' + id).update({ payment: 'Paid' }); }
 
-    function completeOrder(id, table, amount, items, time) {
-        db.ref('orders/' + id).once('value').then(s => {
-            if(s.val().payment !== "Paid") return alert("⚠️ Payment must be marked 'Paid' first!");
-            
-            db.ref('analytics').push({
-                table: table,
-                items: items,
-                amount: parseInt(amount),
-                time: time,
-                timestamp: Date.now()
-            });
+    function completeOrder(id) {
+        const o = globalOrders[id];
+        if(!o) return;
+        if(o.payment !== "Paid") return alert("⚠️ Payment must be marked 'Paid' first!");
+        
+        const finalAmount = o.discountedAmount || o.totalAmount;
 
-            const num = prompt("Enter WhatsApp Number for Bill (10 Digits):");
-            if(num) {
-                const msg = `☠️ *BHOOT BANGLA RECEIPT* ☠️\n\n*${table}*\n---------------------\n${items.replace(/, /g, '\n')}\n---------------------\n*TOTAL: ₹${amount}*\n\n_Thank you for surviving with us!_`;
-                window.open(`https://wa.me/91${num}?text=${encodeURIComponent(msg)}`, '_blank');
-            }
-            db.ref('orders/' + id).remove();
+        db.ref('analytics').push({
+            table: o.table,
+            items: o.items,
+            amount: parseInt(finalAmount),
+            time: o.time,
+            timestamp: Date.now()
         });
+
+        const num = prompt("Enter WhatsApp Number for Bill (10 Digits):");
+        if(num) {
+            const safeItems = (o.items || '').replace(/, /g, '\n');
+            const msg = `☠️ *BHOOT BANGLA RECEIPT* ☠️\n\n*${o.table}*\n---------------------\n${safeItems}\n---------------------\n*TOTAL: ₹${finalAmount}*\n\n_Thank you for surviving with us!_`;
+            window.open(`https://wa.me/91${num}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+        db.ref('orders/' + id).remove();
     }
 
-    // -- SECURE SALES HISTORY & ADVANCED ANALYTICS (TAB 2) --
+    // -- ANALYTICS & LEDGER --
     function clearFilter() {
         document.getElementById('dateFilter').value = '';
         loadAnalytics();
@@ -279,30 +278,23 @@
     function loadAnalytics() {
         db.ref('analytics').once('value', s => {
             const data = s.val();
-            let totalAmount = 0; 
-            let totalOrders = 0;
-            let html = '';
-            let itemCounts = {};
-
-            const selectedDate = document.getElementById('dateFilter').value; // format: YYYY-MM-DD
+            let totalAmount = 0; let totalOrders = 0; let html = ''; let itemCounts = {};
+            const selectedDate = document.getElementById('dateFilter').value;
             
             if(data) {
                 const records = Object.values(data).sort((a,b) => b.timestamp - a.timestamp);
                 
                 records.forEach(r => {
-                    // Date Filtering Logic
                     let recordDate = "";
                     if(r.timestamp) {
                         const d = new Date(r.timestamp);
                         recordDate = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
                     }
-                    
-                    if(selectedDate && recordDate !== selectedDate) return; // Skip if date doesn't match
+                    if(selectedDate && recordDate !== selectedDate) return; 
 
                     totalAmount += r.amount || 0;
                     totalOrders++;
 
-                    // Winning Product Logic (Parsing items string)
                     if(r.items) {
                         const parts = r.items.split(', ');
                         parts.forEach(p => {
@@ -322,4 +314,13 @@
                                 <span style="color:#fff; font-weight:bold; font-family:'Cinzel', serif;">${r.table || 'Unknown'}</span>
                             </div>
                             <div style="color:#ccc; font-size:14px; margin-bottom:12px; line-height:1.4;">${r.items || 'No items saved'}</div>
-                            <div style="color:#4caf50; font-weight:bold; font-size:22px;">₹$
+                            <div style="color:#4caf50; font-weight:bold; font-size:22px;">₹${r.amount || 0}</div>
+                        </div>`;
+                });
+
+                let bestItem = "-"; let maxQty = 0;
+                for(let item in itemCounts) {
+                    if(itemCounts[item] > maxQty) {
+                        maxQty = itemCounts[item];
+                        bestItem = item + "<br><span style='font-size:16px; color:#aaa'>(" + maxQty + " Sold)</span>";
+  
