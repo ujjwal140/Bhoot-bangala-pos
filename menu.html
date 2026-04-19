@@ -2,65 +2,82 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bhoot Bangla | Digital Menu</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
     <style>
-        body { background: #030000; color: #e0e0e0; font-family: 'Outfit', sans-serif; padding-bottom: 120px; }
-        .header { text-align: center; padding: 40px; background: linear-gradient(180deg, #110000 0%, #000 100%); }
-        .header h1 { font-family: 'Cinzel', serif; color: #ff1a1a; letter-spacing: 5px; font-size: 35px; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background: #030000; color: #e0e0e0; font-family: 'Outfit', sans-serif; padding-bottom: 140px; }
         
+        /* Premium Header */
+        .header { text-align: center; padding: 40px 20px; background: linear-gradient(180deg, #110000 0%, #000 100%); border-bottom: 1px solid #200; }
+        .header h1 { font-family: 'Cinzel', serif; color: #ff1a1a; letter-spacing: 5px; font-size: clamp(28px, 8vw, 38px); text-shadow: 0 0 15px rgba(255,0,0,0.4); }
+        
+        /* Category Sections */
         .cat-section { margin-top: 30px; padding: 0 20px; }
-        .cat-title { font-family: 'Cinzel', serif; color: #ff1a1a; font-size: 20px; border-bottom: 1px solid #300; padding-bottom: 5px; margin-bottom: 15px; letter-spacing: 2px; text-transform: uppercase; }
+        .cat-title { font-family: 'Cinzel', serif; color: #ff1a1a; font-size: 18px; border-bottom: 1px solid #400; padding-bottom: 8px; margin-bottom: 15px; letter-spacing: 2px; text-transform: uppercase; }
         
-        .menu-item { background: #0a0a0a; border: 1px solid #200; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-left: 3px solid #ff1a1a; }
-        .item-info h3 { font-size: 18px; margin-bottom: 4px; }
-        .item-info p { color: #ff1a1a; font-weight: bold; }
+        /* Menu Items */
+        .menu-item { background: #0a0a0a; border: 1px solid #1a0505; padding: 18px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-left: 4px solid #ff1a1a; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .item-info h3 { font-size: clamp(16px, 4vw, 19px); margin-bottom: 4px; color: #fff; }
+        .item-info p { color: #ff1a1a; font-weight: bold; font-size: 17px; }
+        .item-desc { color: #666; font-size: 12px; margin-top: 5px; line-height: 1.3; }
         
-        .add-btn { background: transparent; color: #ff1a1a; border: 1px solid #ff1a1a; padding: 8px 15px; border-radius: 4px; font-weight: bold; }
-        .add-btn:active { background: #ff1a1a; color: #000; }
+        .add-btn { background: transparent; color: #ff1a1a; border: 1px solid #800; padding: 10px 18px; border-radius: 6px; font-weight: bold; font-size: 13px; transition: 0.2s; }
+        .add-btn:active { background: #ff1a1a; color: #000; transform: scale(0.9); }
         
-        .cart-bar { position: fixed; bottom: 0; width: 100%; background: rgba(5,0,0,0.95); backdrop-filter: blur(10px); padding: 20px; border-top: 2px solid #ff1a1a; z-index: 100; }
-        .summon-btn { width: 100%; background: #ff1a1a; color: #000; border: none; padding: 15px; border-radius: 4px; font-family: 'Cinzel', serif; font-weight: bold; font-size: 16px; margin-top: 15px; transition: 0.2s; }
+        /* FIXED CART BAR - No More Cutting! */
+        .cart-bar { position: fixed; bottom: 0; width: 100%; background: rgba(8,0,0,0.98); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 20px; border-top: 2px solid #ff1a1a; z-index: 1000; box-shadow: 0 -10px 30px rgba(0,0,0,0.8); }
+        .cart-header { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px; }
         
-        /* THE FIX: Premium Table Badge Styling */
-        .table-badge { background: #ff1a1a; color: #000; padding: 4px 12px; border-radius: 6px; font-family: 'Cinzel', serif; font-size: 14px; font-weight: bold; white-space: nowrap; box-shadow: 0 0 10px rgba(255,0,0,0.3); }
-        .cart-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 16px; }
-        .total-text { white-space: nowrap; }
-        .total-amt { font-size: 22px; color: #fff; }
+        .total-text { font-weight: 600; color: #888; font-size: 13px; letter-spacing: 1px; white-space: nowrap; }
+        .total-amt { font-size: 24px; color: #fff; font-weight: bold; display: block; }
         
-        /* FEEDBACK MODAL */
-        #feedbackModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-box { background: #111; border: 1px solid #ff1a1a; padding: 30px; border-radius: 10px; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 0 30px rgba(255, 0, 0, 0.4); }
-        .skulls { font-size: 40px; margin: 20px 0; cursor: pointer; user-select: none; }
-        .skulls span { filter: grayscale(1); transition: 0.2s; }
-        .skulls span.active { filter: grayscale(0); text-shadow: 0 0 10px #fff; }
+        /* The Dynamic Table Badge Fix */
+        .table-badge { 
+            background: linear-gradient(145deg, #ff1a1a, #800); 
+            color: #fff; 
+            padding: 6px 14px; 
+            border-radius: 8px; 
+            font-family: 'Cinzel', serif; 
+            font-size: 12px; 
+            font-weight: bold; 
+            white-space: nowrap; 
+            flex-shrink: 0; /* Prevents text from squashing */
+            box-shadow: 0 4px 10px rgba(255,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .summon-btn { width: 100%; background: #ff1a1a; color: #000; border: none; padding: 16px; border-radius: 8px; font-family: 'Cinzel', serif; font-weight: 900; font-size: 17px; margin-top: 15px; letter-spacing: 2px; box-shadow: 0 0 20px rgba(255, 26, 26, 0.4); }
+        .summon-btn:active { transform: scale(0.98); background: #cc0000; }
+
+        /* Smooth Animations */
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .cart-bar { animation: slideUp 0.4s ease-out; }
     </style>
 </head>
 <body>
 
-    <div class="header"><h1>BHOOT BANGLA</h1><p style="font-size:10px; color:#444">DIGITAL SUMMONING</p></div>
-    <div id="menuContent"></div>
+    <div class="header">
+        <h1>BHOOT BANGLA</h1>
+        <p style="font-size:10px; color:#555; letter-spacing: 3px; margin-top: 5px;">A CULINARY NIGHTMARE</p>
+    </div>
+
+    <div id="menuContent">
+        <p style="text-align:center; padding:50px; color:#444;">Summoning Menu...</p>
+    </div>
 
     <div class="cart-bar" id="cart" style="display:none">
         <div class="cart-header">
-            <span class="total-text">TOTAL: ₹<span id="totalAmt" class="total-amt">0</span></span>
-            <span id="tableDisplay" class="table-badge"></span>
+            <div>
+                <span class="total-text">SUMMONING TOTAL</span>
+                <span class="total-amt">₹<span id="totalAmt">0</span></span>
+            </div>
+            <div id="tableDisplay" class="table-badge"></div>
         </div>
         <button class="summon-btn" onclick="summonOrder()">SUMMON THE FEAST</button>
-    </div>
-
-    <div id="feedbackModal">
-        <div class="modal-box">
-            <h2 style="font-family:'Cinzel', serif; color:#ff1a1a; letter-spacing:2px">RATE YOUR NIGHTMARE</h2>
-            <p style="color:#888; font-size:12px; margin-top:10px">The souls demand your feedback...</p>
-            <div class="skulls" id="skullBox">
-                <span onclick="rate(1)">💀</span><span onclick="rate(2)">💀</span><span onclick="rate(3)">💀</span><span onclick="rate(4)">💀</span><span onclick="rate(5)">💀</span>
-            </div>
-            <button class="summon-btn" onclick="submitFeedback()">SUBMIT SOUL</button>
-        </div>
     </div>
 
 <script>
@@ -76,19 +93,22 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const table = new URLSearchParams(window.location.search).get('table');
+    const urlParams = new URLSearchParams(window.location.search);
+    const table = urlParams.get('table');
     document.getElementById('tableDisplay').innerText = table ? "TABLE " + table : "SCAN QR";
 
     let cartTotal = 0; 
     let cartItems = {}; 
-    let currentRating = 0;
 
-    // DYNAMIC MENU RENDERING
+    // Dynamic Category Logic
     db.ref('menu_items').on('value', snap => {
         const content = document.getElementById('menuContent');
         const data = snap.val();
         content.innerHTML = '';
-        if(!data) return;
+        if(!data) {
+            content.innerHTML = '<p style="text-align:center; padding:50px; color:#444;">Menu is empty...</p>';
+            return;
+        }
 
         const categories = {};
         for(let id in data) {
@@ -102,7 +122,11 @@
             categories[catName].forEach(item => {
                 section += `
                     <div class="menu-item">
-                        <div class="item-info"><h3>${item.name}</h3><p>₹${item.price}</p><small style="color:#666">${item.desc || ''}</small></div>
+                        <div class="item-info">
+                            <h3>${item.name}</h3>
+                            <p>₹${item.price}</p>
+                            <div class="item-desc">${item.desc || ''}</div>
+                        </div>
                         <button class="add-btn" onclick="addToCart('${item.name}', ${item.price})">ADD</button>
                     </div>`;
             });
@@ -112,11 +136,8 @@
     });
 
     function addToCart(n, p) {
-        if(cartItems[n]) {
-            cartItems[n]++;
-        } else {
-            cartItems[n] = 1;
-        }
+        if(cartItems[n]) { cartItems[n]++; } 
+        else { cartItems[n] = 1; }
         
         cartTotal += parseInt(p);
         document.getElementById('totalAmt').innerText = cartTotal;
@@ -125,9 +146,11 @@
     }
 
     function summonOrder() {
-        if(!table) return alert("Pehle Table QR scan karo!");
+        if(!table) return alert("Please scan the Table QR first!");
+        
         let btn = document.querySelector('.summon-btn');
-        btn.innerText = "SUMMONING...";
+        btn.innerText = "SENDING TO SPIRITS...";
+        btn.disabled = true;
 
         let formattedItems = Object.keys(cartItems).map(key => `${key} x${cartItems[key]}`).join(", ");
 
@@ -138,28 +161,13 @@
             time: new Date().toLocaleTimeString(), 
             payment: 'Unpaid'
         }).then(() => { 
-            document.getElementById('cart').style.display = 'none';
-            document.getElementById('feedbackModal').style.display = 'flex';
-        });
-    }
-
-    function rate(num) {
-        currentRating = num;
-        const skulls = document.getElementById('skullBox').children;
-        for(let i=0; i<5; i++) {
-            if(i < num) skulls[i].classList.add('active');
-            else skulls[i].classList.remove('active');
-        }
-        if(navigator.vibrate) navigator.vibrate(20);
-    }
-
-    function submitFeedback() {
-        if(currentRating === 0) return alert("Please select skulls to rate!");
-        db.ref('feedback').push({ rating: currentRating, time: new Date().toLocaleString() }).then(() => {
-            if(currentRating === 5) {
-                alert("Thank you for 5 Skulls! 💀");
-            }
-            location.reload(); 
+            if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            alert("☠️ ORDER RECEIVED! Your feast is being prepared.");
+            location.reload(); // Reload back to clean menu
+        }).catch(err => {
+            alert("Error: Spirits are busy. Try again.");
+            btn.innerText = "SUMMON THE FEAST";
+            btn.disabled = false;
         });
     }
 </script>
