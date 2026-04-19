@@ -3,37 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bhoot Bangla | Admin Vault</title>
+    <title>Bhoot Bangla | Master Admin</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { background: #050000; color: #e0e0e0; font-family: 'Outfit', sans-serif; }
+        body { background: #050000; color: #e0e0e0; font-family: 'Outfit', sans-serif; overflow-x: hidden; }
         
         .header { background: #0a0a0a; padding: 20px; border-bottom: 1px solid #300; display: flex; justify-content: space-between; align-items: center; }
         .header h1 { font-family: 'Cinzel', serif; color: #ff1a1a; font-size: 22px; }
         .alarm-btn { background: #111; color: #ff4444; border: 1px solid #ff4444; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; }
         
+        /* 3 Pro Tabs */
         .tabs { display: flex; background: #0a0a0a; border-bottom: 1px solid #222; }
         .tab-btn { flex: 1; padding: 15px; background: transparent; color: #888; border: none; font-weight: bold; cursor: pointer; font-family: 'Cinzel', serif; }
-        .tab-btn.active { color: #ff1a1a; border-bottom: 2px solid #ff1a1a; }
+        .tab-btn.active { color: #ff1a1a; border-bottom: 2px solid #ff1a1a; background: rgba(255,0,0,0.05); }
         
+        /* Live Orders Grid */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; padding: 20px; }
         .card { background: #0d0505; border: 1px solid #300; padding: 20px; border-radius: 12px; border-left: 4px solid #ff1a1a; }
         .card.paid { border-left-color: #4caf50; opacity: 0.8; }
-        
         .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 10px; margin-bottom: 10px; }
         .card-title { color: #ff1a1a; font-weight: bold; font-size: 20px; font-family: 'Cinzel', serif; }
         .cancel-btn { background: rgba(255,0,0,0.1); border: 1px solid #ff1a1a; color: #ff1a1a; border-radius: 4px; padding: 4px 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
         
         .discount-box { display: flex; align-items: center; gap: 8px; background: #111; padding: 10px; border-radius: 6px; margin-bottom: 15px; border: 1px dashed #444; }
         .discount-box input { width: 18px; height: 18px; accent-color: #ff1a1a; }
-        .discount-box label { font-size: 13px; color: #aaa; cursor: pointer; }
-
+        
         .btn-paid { flex: 1; background: #0e2412; color: #4caf50; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
         .btn-done { flex: 1; background: #330000; color: #ff4444; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
         
+        /* History & Inventory Styles */
+        .section-container { padding: 20px; max-width: 800px; margin: auto; }
+        .history-card { background: #111; border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid #4caf50; }
+        .inventory-form { background: #0a0a0a; padding: 20px; border-radius: 10px; border: 1px solid #ff1a1a; margin-bottom: 20px; }
+        .inventory-form input { width: 100%; padding: 12px; margin-bottom: 10px; background: #000; border: 1px solid #444; color: #fff; border-radius: 6px; }
+        .inventory-form button { width: 100%; background: #ff1a1a; color: #000; padding: 12px; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; }
+        .inventory-item { display: flex; justify-content: space-between; background: #111; padding: 15px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #222; align-items: center; }
+
+        /* Security */
         #pinScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; }
         .pin-box { background: #0a0a0a; padding: 30px; border-radius: 12px; border: 1px solid #f00; text-align: center; }
         .pin-box input { background: transparent; border: 2px solid #300; color: #fff; padding: 15px; font-size: 24px; text-align: center; width: 100%; margin: 20px 0; border-radius: 6px; }
@@ -58,16 +67,33 @@
 
         <div class="tabs">
             <button class="tab-btn active" onclick="showTab('orderGrid', event)">LIVE ORDERS</button>
-            <button class="tab-btn" onclick="showTab('analyticsTab', event)">ANALYTICS</button>
+            <button class="tab-btn" onclick="showTab('analyticsTab', event)">SALES HISTORY</button>
+            <button class="tab-btn" onclick="showTab('inventoryTab', event)">MENU MANAGER</button>
         </div>
 
         <div id="orderGrid" class="grid"></div>
         
-        <div id="analyticsTab" style="display:none; text-align:center; padding: 40px;">
-            <div style="background:#111; padding:30px; border-radius:12px; border:1px solid #333;">
+        <div id="analyticsTab" class="section-container" style="display:none;">
+            <div style="background:#0a0a0a; padding:30px; border-radius:12px; border:1px solid #333; text-align:center; box-shadow: 0 0 20px rgba(0,0,0,0.8);">
                 <h3 style="color:#aaa;">TOTAL REVENUE</h3>
                 <h1 id="totalRevenue" style="color:#4caf50; font-size:45px; margin-top:10px">₹0</h1>
+                <button onclick="clearHistory()" style="background:transparent; border:1px solid #ff4444; color:#ff4444; padding:8px 15px; border-radius:6px; margin-top:20px; cursor:pointer;">CLEAR DATA</button>
             </div>
+            
+            <h3 style="color:#fff; font-family:'Cinzel', serif; margin-top:30px; margin-bottom:15px; border-bottom: 1px solid #333; padding-bottom:10px;">Full Order Ledger</h3>
+            <div id="historyList"></div>
+        </div>
+
+        <div id="inventoryTab" class="section-container" style="display:none;">
+            <div class="inventory-form">
+                <h3 style="color:#ff1a1a; margin-bottom:15px; font-family:'Cinzel', serif;">Add New Menu Item</h3>
+                <input type="text" id="iName" placeholder="Item Name (e.g. Ghost Burger)">
+                <input type="number" id="iPrice" placeholder="Price (e.g. 150)">
+                <input type="text" id="iCat" placeholder="Category (e.g. Burgers, Drinks)">
+                <button onclick="addMenuItem()">+ ADD ITEM TO MENU</button>
+            </div>
+            <h3 style="color:#fff; font-family:'Cinzel', serif; margin-bottom:15px; border-bottom: 1px solid #333; padding-bottom:10px;">Current Menu / Out of Stock</h3>
+            <div id="inventoryList"></div>
         </div>
     </div>
 
@@ -91,6 +117,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // -- ALARM LOGIC --
     let alarmEnabled = false; let isAlarmRinging = false;
     const alertSound = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
     alertSound.loop = true; let prevOrderCount = 0; let firstLoad = true;
@@ -107,15 +134,18 @@
     }
     function stopSound() { alertSound.pause(); alertSound.currentTime = 0; isAlarmRinging = false; }
 
+    // -- TAB NAVIGATION --
     function showTab(id, e) {
-        document.getElementById('orderGrid').style.display = 'none';
-        document.getElementById('analyticsTab').style.display = 'none';
+        ['orderGrid', 'analyticsTab', 'inventoryTab'].forEach(t => document.getElementById(t).style.display = 'none');
         document.getElementById(id).style.display = id === 'orderGrid' ? 'grid' : 'block';
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
+        
         if(id === 'analyticsTab') loadAnalytics();
+        if(id === 'inventoryTab') loadInventory();
     }
 
+    // -- LIVE ORDERS (TAB 1) --
     db.ref('orders').on('value', snap => {
         const grid = document.getElementById('orderGrid');
         grid.innerHTML = '';
@@ -123,8 +153,7 @@
         let currentCount = data ? Object.keys(data).length : 0;
 
         if(!firstLoad && currentCount > prevOrderCount && alarmEnabled) {
-            isAlarmRinging = true; alertSound.play();
-            setTimeout(() => { stopSound(); }, 6000);
+            isAlarmRinging = true; alertSound.play(); setTimeout(() => { stopSound(); }, 6000);
         }
         prevOrderCount = currentCount; firstLoad = false;
 
@@ -133,8 +162,6 @@
         for(let id in data) {
             const o = data[id];
             const isPaid = o.payment === "Paid";
-            
-            // Checkbox & Price Logic
             const displayTotal = o.discountedAmount || o.totalAmount;
             const isDiscounted = o.discountedAmount ? true : false;
             const showCheckbox = (!isPaid && o.totalAmount >= 199) || isDiscounted;
@@ -145,10 +172,8 @@
                         <div class="card-title">${o.table}</div>
                         <button class="cancel-btn" onclick="cancelOrder('${id}')">❌ CANCEL</button>
                     </div>
-                    
                     <div style="font-size:11px; color:#666; margin-bottom:10px">${o.time}</div>
                     <div style="margin-bottom:15px; font-size:15px; color:#ccc; line-height:1.4;">${o.items}</div>
-                    
                     <div style="font-size:26px; font-weight:bold; color:#fff; margin-bottom:12px;">₹${displayTotal}</div>
                     
                     <div class="discount-box" style="display: ${showCheckbox ? 'flex' : 'none'}; opacity: ${isPaid ? '0.5' : '1'}">
@@ -158,33 +183,35 @@
                     
                     <div style="display:flex; gap:10px">
                         <button class="btn-paid" onclick="markPaid('${id}')">${o.payment}</button>
-                        <button class="btn-done" onclick="completeOrder('${id}', '${o.table}', '${displayTotal}', '${o.items}')">DONE & WHATSAPP</button>
+                        <button class="btn-done" onclick="completeOrder('${id}', '${o.table}', '${displayTotal}', '${o.items}', '${o.time}')">DONE</button>
                     </div>
                 </div>`;
         }
     });
 
     function toggleDiscount(id, originalAmount, checkbox) {
-        if(checkbox.checked) {
-            const newTotal = Math.round(originalAmount * 0.9);
-            db.ref('orders/' + id).update({ discountedAmount: newTotal });
-        } else {
-            db.ref('orders/' + id).update({ discountedAmount: null });
-        }
+        const newTotal = checkbox.checked ? Math.round(originalAmount * 0.9) : null;
+        db.ref('orders/' + id).update({ discountedAmount: newTotal });
     }
 
-    function cancelOrder(id) {
-        if(confirm("Bhai, kya sach mein order DELETE karna hai?")) db.ref('orders/' + id).remove();
-    }
-
+    function cancelOrder(id) { if(confirm("Delete this order completely?")) db.ref('orders/' + id).remove(); }
     function markPaid(id) { db.ref('orders/' + id).update({ payment: 'Paid' }); }
 
-    function completeOrder(id, table, amount, items) {
+    // THE PRO FIX: Pushing detailed data to History
+    function completeOrder(id, table, amount, items, time) {
         db.ref('orders/' + id).once('value').then(s => {
             if(s.val().payment !== "Paid") return alert("⚠️ Pehle Payment mark karo bhai!");
             
-            db.ref('analytics').push({ amount: parseInt(amount) });
-            const num = prompt("Enter Customer WhatsApp Number:");
+            // Save FULL detail to analytics ledger
+            db.ref('analytics').push({
+                table: table,
+                items: items,
+                amount: parseInt(amount),
+                time: time,
+                timestamp: Date.now()
+            });
+
+            const num = prompt("Enter WhatsApp Number for Bill:");
             if(num) {
                 const msg = `☠️ BHOOT BANGLA RECEIPT ☠️\n\n${table}\n---------------------\n${items.replace(/, /g, '\n')}\n---------------------\nTOTAL: ₹${amount}\n\nThank you for surviving with us!`;
                 window.open(`https://wa.me/91${num}?text=${encodeURIComponent(msg)}`, '_blank');
@@ -193,12 +220,81 @@
         });
     }
 
+    // -- SALES HISTORY (TAB 2) --
     function loadAnalytics() {
         db.ref('analytics').once('value', s => {
-            let total = 0;
-            s.forEach(child => { total += child.val().amount || 0; });
+            const data = s.val();
+            let total = 0; let html = '';
+            
+            if(data) {
+                // Sort by newest first
+                const records = Object.values(data).sort((a,b) => b.timestamp - a.timestamp);
+                records.forEach(r => {
+                    total += r.amount || 0;
+                    html += `
+                        <div class="history-card">
+                            <div style="display:flex; justify-content:space-between; color:#aaa; font-size:12px; margin-bottom:5px;">
+                                <span>${r.time || 'Time not saved'}</span>
+                                <span style="color:#fff; font-weight:bold;">${r.table || 'Unknown'}</span>
+                            </div>
+                            <div style="color:#ddd; font-size:14px; margin-bottom:8px;">${r.items || 'Items not saved'}</div>
+                            <div style="color:#4caf50; font-weight:bold; font-size:18px;">₹${r.amount || 0}</div>
+                        </div>`;
+                });
+            } else {
+                html = '<p style="color:#666; text-align:center;">No sales data found yet...</p>';
+            }
+            
             document.getElementById('totalRevenue').innerText = '₹' + total;
+            document.getElementById('historyList').innerHTML = html;
         });
+    }
+
+    function clearHistory() {
+        if(prompt("DANGER ZONE! Type 'DELETE' to erase all sales history:") === "DELETE") {
+            db.ref('analytics').remove().then(() => loadAnalytics());
+        }
+    }
+
+    // -- INVENTORY MANAGER (TAB 3) --
+    function addMenuItem() {
+        const name = document.getElementById('iName').value.trim();
+        const price = document.getElementById('iPrice').value.trim();
+        const cat = document.getElementById('iCat').value.trim();
+        
+        if(!name || !price || !cat) return alert("Fill all fields first!");
+        
+        db.ref('menu_items').push({ name: name, price: price, cat: cat }).then(() => {
+            document.getElementById('iName').value = '';
+            document.getElementById('iPrice').value = '';
+            document.getElementById('iCat').value = '';
+            alert("✅ Item Added to Menu!");
+            loadInventory();
+        });
+    }
+
+    function loadInventory() {
+        db.ref('menu_items').once('value', s => {
+            let html = '';
+            s.forEach(child => {
+                const item = child.val();
+                html += `
+                    <div class="inventory-item">
+                        <div>
+                            <div style="color:#fff; font-weight:bold; font-size:16px;">${item.name}</div>
+                            <div style="color:#ff1a1a; font-size:13px; margin-top:4px;">₹${item.price} | ${item.cat}</div>
+                        </div>
+                        <button onclick="removeMenuItem('${child.key}')" style="background:transparent; border:1px solid #ff4444; color:#ff4444; padding:5px 10px; border-radius:4px; cursor:pointer;">DELETE</button>
+                    </div>`;
+            });
+            document.getElementById('inventoryList').innerHTML = html || '<p style="color:#666;">Menu is empty.</p>';
+        });
+    }
+
+    function removeMenuItem(key) {
+        if(confirm("Remove this item from the Menu?")) {
+            db.ref('menu_items/' + key).remove().then(() => loadInventory());
+        }
     }
 </script>
 </body>
