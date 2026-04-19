@@ -3,107 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bhoot Bangla | Premium Digital Menu</title>
+    <title>Bhoot Bangla | Digital Menu</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: #050505; color: #e0e0e0; font-family: 'Outfit', sans-serif; padding-bottom: 150px; overflow-x: hidden; }
+        body { background: #030000; color: #e0e0e0; font-family: 'Outfit', sans-serif; padding-bottom: 120px; overflow-x: hidden; }
         
-        /* Premium Ambient Background */
-        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at 50% 0%, #3a0000 0%, #050505 60%); z-index: -1; opacity: 0.6; }
+        /* Premium Header */
+        .header { text-align: center; padding: 40px 20px; background: linear-gradient(180deg, #110000 0%, #000 100%); border-bottom: 1px solid rgba(255,26,26,0.3); }
+        .header h1 { font-family: 'Cinzel', serif; color: #ff1a1a; letter-spacing: 5px; font-size: 32px; text-shadow: 0 0 15px rgba(255,0,0,0.4); }
+        .header p { font-size:10px; color:#888; letter-spacing: 3px; margin-top: 5px; }
 
-        /* Header */
-        .header { text-align: center; padding: 40px 20px; background: rgba(10,0,0,0.4); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,26,26,0.2); }
-        .header h1 { font-family: 'Cinzel', serif; color: #ff1a1a; letter-spacing: 6px; font-size: clamp(28px, 8vw, 38px); text-shadow: 0 0 20px rgba(255,26,26,0.6); }
-        .header p { font-size:11px; color:#888; letter-spacing: 4px; margin-top: 5px; }
-
-        /* Menu Grid */
+        /* Menu Display */
         .cat-section { margin-top: 30px; padding: 0 15px; }
-        .cat-title { font-family: 'Cinzel', serif; color: #ff3333; font-size: 18px; border-bottom: 1px solid rgba(255,26,26,0.3); padding-bottom: 8px; margin-bottom: 15px; letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 0 10px rgba(255,0,0,0.3); }
+        .cat-title { font-family: 'Cinzel', serif; color: #ff3333; font-size: 18px; border-bottom: 1px solid #400; padding-bottom: 8px; margin-bottom: 15px; letter-spacing: 2px; }
         
-        /* Glassmorphism Cards */
-        .menu-item { background: rgba(15, 5, 5, 0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255, 26, 26, 0.15); padding: 18px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); transition: transform 0.2s ease; border-left: 3px solid #ff1a1a; }
-        .item-info h3 { font-size: clamp(16px, 4vw, 19px); color: #fff; margin-bottom: 4px; font-weight: 600; }
-        .item-info p { color: #ff4d4d; font-weight: 600; font-size: 16px; }
+        .menu-item { background: #0a0a0a; border: 1px solid #200; padding: 18px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-left: 4px solid #ff1a1a; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .item-info h3 { font-size: 17px; color: #fff; margin-bottom: 4px; }
+        .item-info p { color: #ff1a1a; font-weight: bold; }
+        .add-btn { background: transparent; color: #ff1a1a; border: 1px solid #800; padding: 8px 18px; border-radius: 6px; font-weight: bold; transition: 0.2s; }
+        .add-btn:active { background: #ff1a1a; color: #000; transform: scale(0.9); }
+
+        /* ZOMATO STYLE FLOATING BAR */
+        .cart-trigger { position: fixed; bottom: 20px; left: 5%; width: 90%; background: #ff1a1a; color: #000; border-radius: 12px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; box-shadow: 0 5px 20px rgba(255,0,0,0.4); cursor: pointer; font-family: 'Cinzel', serif; font-weight: bold; }
         
-        /* Cyber Neon Buttons */
-        .add-btn { background: rgba(255, 26, 26, 0.1); color: #ff1a1a; border: 1px solid rgba(255, 26, 26, 0.5); padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; }
-        .add-btn:active { background: #ff1a1a; color: #000; transform: scale(0.92); box-shadow: 0 0 20px #ff1a1a; }
-
-        /* THE FLOATING CART BAR (Trigger) */
-        .cart-trigger { position: fixed; bottom: 20px; left: 5%; width: 90%; background: linear-gradient(135deg, #cc0000, #660000); color: #fff; border-radius: 12px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; box-shadow: 0 10px 30px rgba(255,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); animation: slideUp 0.5s ease; cursor: pointer; transition: 0.2s; }
-        .cart-trigger:active { transform: scale(0.98); }
-        .cart-trigger .trigger-text { font-family: 'Cinzel', serif; font-weight: bold; font-size: 15px; letter-spacing: 1px; }
-        .cart-trigger .trigger-amt { font-size: 18px; font-weight: bold; }
-
-        /* THE GLASS DRAWER (Bottom Sheet) */
-        .cart-drawer { position: fixed; bottom: 0; left: 0; width: 100%; max-height: 85vh; background: rgba(10, 2, 2, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top-left-radius: 24px; border-top-right-radius: 24px; border-top: 1px solid rgba(255,26,26,0.3); z-index: 2000; padding: 25px 20px; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 -10px 50px rgba(0,0,0,0.8); display: flex; flex-direction: column; }
+        /* BOTTOM SLIDE DRAWER */
+        .cart-drawer { position: fixed; bottom: 0; left: 0; width: 100%; max-height: 80vh; background: rgba(8,0,0,0.98); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-top-left-radius: 20px; border-top-right-radius: 20px; border-top: 2px solid #ff1a1a; z-index: 2000; padding: 25px 20px; transform: translateY(100%); transition: transform 0.3s ease-out; display: flex; flex-direction: column; box-shadow: 0 -10px 40px rgba(0,0,0,0.8); }
         .cart-drawer.active { transform: translateY(0); }
         
-        .drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 15px; }
+        .drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 15px; }
         .drawer-header h2 { font-family: 'Cinzel', serif; color: #ff1a1a; font-size: 20px; }
-        .close-btn { background: none; border: none; color: #888; font-size: 24px; cursor: pointer; padding: 5px; }
+        .close-btn { background: none; border: none; color: #888; font-size: 28px; padding: 0 10px; cursor: pointer; }
 
-        .cart-items-list { overflow-y: auto; flex-grow: 1; margin-bottom: 20px; padding-right: 5px; }
-        .cart-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px; border-left: 2px solid #550000; }
-        .cart-row-name { font-size: 15px; color: #eee; width: 45%; }
+        .cart-items-list { overflow-y: auto; flex-grow: 1; margin-bottom: 15px; }
+        .cart-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #222; padding-bottom: 12px; }
+        .qty-controls { display: flex; align-items: center; gap: 12px; background: #111; border-radius: 20px; border: 1px solid #333; padding: 2px 5px; }
+        .qty-btn { background: transparent; color: #ff1a1a; border: none; font-size: 20px; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; }
         
-        /* Pro +/- Adjusters */
-        .qty-controls { display: flex; align-items: center; gap: 15px; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 20px; border: 1px solid rgba(255,26,26,0.2); }
-        .qty-btn { background: transparent; color: #ff1a1a; border: none; font-size: 20px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; }
-        .qty-btn:active { background: rgba(255,26,26,0.2); }
-        .qty-num { font-weight: bold; color: #fff; font-size: 16px; min-width: 20px; text-align: center; }
-
-        .drawer-footer { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
-        .table-badge { background: linear-gradient(145deg, #ff1a1a, #800); color: #fff; padding: 6px 14px; border-radius: 8px; font-family: 'Cinzel', serif; font-size: 13px; font-weight: bold; white-space: nowrap; box-shadow: 0 4px 10px rgba(255,0,0,0.3); }
-        .total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .total-row span { font-size: 14px; color: #aaa; letter-spacing: 1px; }
-        .total-row strong { font-size: 26px; color: #fff; }
-
-        .summon-btn { width: 100%; background: linear-gradient(90deg, #ff1a1a, #cc0000); color: #000; border: none; padding: 18px; border-radius: 12px; font-family: 'Cinzel', serif; font-weight: 900; font-size: 17px; letter-spacing: 2px; box-shadow: 0 0 25px rgba(255, 26, 26, 0.4); text-shadow: 0 1px 2px rgba(255,255,255,0.3); transition: 0.2s; }
-        .summon-btn:active { transform: scale(0.97); }
-
-        /* Overlay to dim background when drawer is open */
-        .overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); backdrop-filter: blur(3px); z-index: 1500; display: none; opacity: 0; transition: opacity 0.3s; }
-        .overlay.active { display: block; opacity: 1; }
-
-        @keyframes slideUp { from { transform: translateY(150%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .table-badge { background: #ff1a1a; color: #000; padding: 5px 12px; border-radius: 6px; font-family: 'Cinzel', serif; font-size: 13px; font-weight: bold; white-space: nowrap; }
+        
+        .summon-btn { width: 100%; background: #ff1a1a; color: #000; border: none; padding: 16px; border-radius: 8px; font-family: 'Cinzel', serif; font-weight: bold; font-size: 16px; margin-top: 15px; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1500; display: none; }
+        .overlay.active { display: block; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h1>BHOOT BANGLA</h1>
-        <p>THE PREMIUM HAUNTED CAFE</p>
+        <p>DIGITAL SUMMONING</p>
     </div>
 
-    <div id="menuContent">
-        <p style="text-align:center; padding:50px; color:#555;">Summoning Spirits...</p>
-    </div>
+    <div id="menuContent"></div>
 
     <div class="cart-trigger" id="cartTrigger" style="display:none" onclick="toggleDrawer(true)">
-        <span class="trigger-text">VIEW SUMMONING 🛒</span>
-        <span class="trigger-amt">₹<span id="triggerTotal">0</span></span>
+        <span>VIEW FEAST 🛒</span>
+        <span>₹<span id="triggerTotal">0</span></span>
     </div>
 
     <div class="overlay" id="overlay" onclick="toggleDrawer(false)"></div>
     <div class="cart-drawer" id="cartDrawer">
         <div class="drawer-header">
-            <h2>YOUR FEAST</h2>
-            <button class="close-btn" onclick="toggleDrawer(false)">✕</button>
+            <h2>YOUR ORDER</h2>
+            <button class="close-btn" onclick="toggleDrawer(false)">&times;</button>
         </div>
         
         <div class="cart-items-list" id="cartItemsList"></div>
         
-        <div class="drawer-footer">
-            <div class="total-row">
-                <div id="tableDisplay" class="table-badge"></div>
-                <div><span>TOTAL</span><br><strong id="drawerTotal">₹0</strong></div>
-            </div>
-            <button class="summon-btn" id="summonBtn" onclick="summonOrder()">SUMMON THE SPIRITS</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #333; padding-top:15px;">
+            <div id="tableDisplay" class="table-badge"></div>
+            <div style="font-size:24px; font-weight:bold; color:#fff;">₹<span id="drawerTotal">0</span></div>
         </div>
+        <button class="summon-btn" id="summonBtn" onclick="summonOrder()">SUMMON THE FEAST</button>
     </div>
 
 <script>
@@ -119,20 +92,16 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const table = urlParams.get('table');
+    const table = new URLSearchParams(window.location.search).get('table');
     document.getElementById('tableDisplay').innerText = table ? "TABLE " + table : "SCAN QR";
 
-    let cartTotal = 0; 
-    let cartItems = {}; 
-    let itemPrices = {};
+    let cartTotal = 0; let cartItems = {}; let itemPrices = {};
 
-    // Dynamic Categories Render
     db.ref('menu_items').on('value', snap => {
         const content = document.getElementById('menuContent');
         const data = snap.val();
         content.innerHTML = '';
-        if(!data) { content.innerHTML = '<p style="text-align:center; padding:50px; color:#444;">Menu is empty...</p>'; return; }
+        if(!data) return;
 
         const categories = {};
         for(let id in data) {
@@ -145,14 +114,7 @@
         for(let catName in categories) {
             let section = `<div class="cat-section"><h2 class="cat-title">${catName}</h2>`;
             categories[catName].forEach(item => {
-                section += `
-                    <div class="menu-item">
-                        <div class="item-info">
-                            <h3>${item.name}</h3>
-                            <p>₹${item.price}</p>
-                        </div>
-                        <button class="add-btn" onclick="addToCart('${item.name}')">ADD +</button>
-                    </div>`;
+                section += `<div class="menu-item"><div class="item-info"><h3>${item.name}</h3><p>₹${item.price}</p></div><button class="add-btn" onclick="addToCart('${item.name}')">ADD</button></div>`;
             });
             section += `</div>`;
             content.innerHTML += section;
@@ -160,25 +122,14 @@
     });
 
     function toggleDrawer(show) {
-        if(navigator.vibrate) navigator.vibrate(20);
-        const drawer = document.getElementById('cartDrawer');
-        const overlay = document.getElementById('overlay');
-        if(show) {
-            drawer.classList.add('active');
-            overlay.classList.add('active');
-        } else {
-            drawer.classList.remove('active');
-            overlay.classList.remove('active');
-            // If empty, hide trigger bar when closing drawer
-            if(Object.keys(cartItems).length === 0) document.getElementById('cartTrigger').style.display = 'none';
-        }
+        document.getElementById('cartDrawer').classList.toggle('active', show);
+        document.getElementById('overlay').classList.toggle('active', show);
+        if(!show && cartTotal === 0) document.getElementById('cartTrigger').style.display = 'none';
     }
 
     function updateCartUI() {
         const list = document.getElementById('cartItemsList');
-        list.innerHTML = '';
-        cartTotal = 0;
-        let hasItems = false;
+        list.innerHTML = ''; cartTotal = 0; let hasItems = false;
 
         for(let name in cartItems) {
             if(cartItems[name] > 0) {
@@ -187,37 +138,27 @@
                 cartTotal += price;
                 list.innerHTML += `
                     <div class="cart-row">
-                        <div class="cart-row-name">${name}<br><span style="color:#aaa; font-size:12px">₹${itemPrices[name]} each</span></div>
+                        <span style="color:#eee; font-size:15px; width:50%;">${name}</span>
                         <div class="qty-controls">
                             <button class="qty-btn" onclick="changeQty('${name}', -1)">-</button>
-                            <span class="qty-num">${cartItems[name]}</span>
+                            <span style="color:#fff; font-weight:bold; min-width:15px; text-align:center;">${cartItems[name]}</span>
                             <button class="qty-btn" onclick="changeQty('${name}', 1)">+</button>
                         </div>
-                        <div style="font-weight:bold; color:#fff; width:20%; text-align:right">₹${price}</div>
+                        <span style="color:#fff; font-weight:bold;">₹${price}</span>
                     </div>`;
             }
         }
-        
         document.getElementById('triggerTotal').innerText = cartTotal;
-        document.getElementById('drawerTotal').innerText = "₹" + cartTotal;
+        document.getElementById('drawerTotal').innerText = cartTotal;
         
-        if(hasItems) {
-            document.getElementById('cartTrigger').style.display = 'flex';
-        } else {
-            toggleDrawer(false);
-            document.getElementById('cartTrigger').style.display = 'none';
-        }
+        if(hasItems) { document.getElementById('cartTrigger').style.display = 'flex'; } 
+        else { toggleDrawer(false); document.getElementById('cartTrigger').style.display = 'none'; }
     }
 
     function addToCart(n) {
         cartItems[n] = (cartItems[n] || 0) + 1;
-        if(navigator.vibrate) navigator.vibrate([30, 50, 30]);
+        if(navigator.vibrate) navigator.vibrate(40);
         updateCartUI();
-        
-        // Brief highlight effect on button
-        event.target.style.background = '#ff1a1a';
-        event.target.style.color = '#000';
-        setTimeout(() => { event.target.style.background = 'rgba(255, 26, 26, 0.1)'; event.target.style.color = '#ff1a1a'; }, 200);
     }
 
     function changeQty(n, delta) {
@@ -228,26 +169,19 @@
     }
 
     function summonOrder() {
-        if(!table) return alert("Please scan the Table QR first!");
-        let btn = document.getElementById('summonBtn');
-        btn.innerText = "SENDING TO BEYOND...";
-        btn.disabled = true;
-
+        if(!table) return alert("Pehle Table QR scan karo!");
+        document.getElementById('summonBtn').innerText = "SENDING...";
+        
         let formattedItems = Object.keys(cartItems).map(key => `${key} x${cartItems[key]}`).join(", ");
 
         db.ref('orders').push({
-            table: "Table " + table, 
-            items: formattedItems, 
-            totalAmount: cartTotal, 
-            time: new Date().toLocaleTimeString(), 
-            payment: 'Unpaid'
+            table: "Table " + table, items: formattedItems, totalAmount: cartTotal, 
+            time: new Date().toLocaleTimeString(), payment: 'Unpaid'
         }).then(() => { 
-            if(navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
-            alert("☠️ ORDER CONFIRMED! The spirits are preparing your feast.");
-            location.reload(); 
+            if(navigator.vibrate) navigator.vibrate([100,50,100]);
+            alert("☠️ ORDER CONFIRMED!"); location.reload(); 
         });
     }
 </script>
 </body>
 </html>
-
