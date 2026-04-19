@@ -23,7 +23,13 @@
         .add-btn:active { background: #ff1a1a; color: #000; }
         
         .cart-bar { position: fixed; bottom: 0; width: 100%; background: rgba(5,0,0,0.95); backdrop-filter: blur(10px); padding: 20px; border-top: 2px solid #ff1a1a; z-index: 100; }
-        .summon-btn { width: 100%; background: #ff1a1a; color: #000; border: none; padding: 15px; border-radius: 4px; font-family: 'Cinzel', serif; font-weight: bold; font-size: 16px; margin-top: 10px; transition: 0.2s; }
+        .summon-btn { width: 100%; background: #ff1a1a; color: #000; border: none; padding: 15px; border-radius: 4px; font-family: 'Cinzel', serif; font-weight: bold; font-size: 16px; margin-top: 15px; transition: 0.2s; }
+        
+        /* THE FIX: Premium Table Badge Styling */
+        .table-badge { background: #ff1a1a; color: #000; padding: 4px 12px; border-radius: 6px; font-family: 'Cinzel', serif; font-size: 14px; font-weight: bold; white-space: nowrap; box-shadow: 0 0 10px rgba(255,0,0,0.3); }
+        .cart-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 16px; }
+        .total-text { white-space: nowrap; }
+        .total-amt { font-size: 22px; color: #fff; }
         
         /* FEEDBACK MODAL */
         #feedbackModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
@@ -39,9 +45,9 @@
     <div id="menuContent"></div>
 
     <div class="cart-bar" id="cart" style="display:none">
-        <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:18px">
-            <span>TOTAL: ₹<span id="totalAmt">0</span></span>
-            <span id="tableDisplay" style="color:#ff1a1a"></span>
+        <div class="cart-header">
+            <span class="total-text">TOTAL: ₹<span id="totalAmt" class="total-amt">0</span></span>
+            <span id="tableDisplay" class="table-badge"></span>
         </div>
         <button class="summon-btn" onclick="summonOrder()">SUMMON THE FEAST</button>
     </div>
@@ -74,7 +80,7 @@
     document.getElementById('tableDisplay').innerText = table ? "TABLE " + table : "SCAN QR";
 
     let cartTotal = 0; 
-    let cartItems = {}; // NAYA LOGIC: Array ki jagah Object use kar rahe hain grouping ke liye
+    let cartItems = {}; 
     let currentRating = 0;
 
     // DYNAMIC MENU RENDERING
@@ -106,17 +112,16 @@
     });
 
     function addToCart(n, p) {
-        // NAYA MULTIPLIER LOGIC
         if(cartItems[n]) {
-            cartItems[n]++; // Agar pehle se hai toh quantity badhao
+            cartItems[n]++;
         } else {
-            cartItems[n] = 1; // Naya item hai toh 1 set karo
+            cartItems[n] = 1;
         }
         
         cartTotal += parseInt(p);
         document.getElementById('totalAmt').innerText = cartTotal;
         document.getElementById('cart').style.display = 'block';
-        if(navigator.vibrate) navigator.vibrate(40); // Vivo phone tap vibration
+        if(navigator.vibrate) navigator.vibrate(40); 
     }
 
     function summonOrder() {
@@ -124,12 +129,11 @@
         let btn = document.querySelector('.summon-btn');
         btn.innerText = "SUMMONING...";
 
-        // CONVERT OBJECT TO STRING (e.g., "Demon Burger x2, Coke x1")
         let formattedItems = Object.keys(cartItems).map(key => `${key} x${cartItems[key]}`).join(", ");
 
         db.ref('orders').push({
             table: "Table " + table, 
-            items: formattedItems, // Updated clean items list
+            items: formattedItems, 
             totalAmount: cartTotal, 
             time: new Date().toLocaleTimeString(), 
             payment: 'Unpaid'
@@ -139,7 +143,6 @@
         });
     }
 
-    // FEEDBACK LOGIC
     function rate(num) {
         currentRating = num;
         const skulls = document.getElementById('skullBox').children;
