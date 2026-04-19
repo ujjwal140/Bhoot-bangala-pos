@@ -2,49 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bhoot Bangla | Admin Command Center</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bhoot Bangla | Admin Vault</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { background: #020202; color: #e0e0e0; font-family: 'Outfit', sans-serif; }
+        body { background: #050000; color: #e0e0e0; font-family: 'Outfit', sans-serif; }
         
-        /* Command Center Header */
-        .header { background: #0a0000; padding: 20px; border-bottom: 2px solid #ff1a1a; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 20px rgba(255,0,0,0.2); }
-        .header h1 { font-family: 'Cinzel', serif; color: #ff1a1a; font-size: 20px; text-shadow: 0 0 10px #ff1a1a; }
-        .alarm-btn { background: #1a0505; color: #ff4444; border: 1px solid #ff4444; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .header { background: #0a0a0a; padding: 20px; border-bottom: 1px solid #300; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-family: 'Cinzel', serif; color: #ff1a1a; font-size: 22px; }
+        .alarm-btn { background: #111; color: #ff4444; border: 1px solid #ff4444; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; }
         
-        /* High-Tech Tabs */
-        .tabs { display: flex; background: #0a0a0a; border-bottom: 1px solid #333; }
-        .tab-btn { flex: 1; padding: 15px; background: transparent; color: #888; border: none; font-family: 'Cinzel', serif; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .tab-btn.active { color: #ff1a1a; border-bottom: 3px solid #ff1a1a; background: rgba(255,26,26,0.05); }
+        .tabs { display: flex; background: #0a0a0a; border-bottom: 1px solid #222; }
+        .tab-btn { flex: 1; padding: 15px; background: transparent; color: #888; border: none; font-weight: bold; cursor: pointer; font-family: 'Cinzel', serif; }
+        .tab-btn.active { color: #ff1a1a; border-bottom: 2px solid #ff1a1a; }
         
-        /* Glass Orders Grid */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; padding: 20px; }
-        .card { background: rgba(15, 15, 15, 0.8); backdrop-filter: blur(10px); border: 1px solid #330000; padding: 20px; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.6); border-left: 4px solid #ff1a1a; position: relative; }
+        .card { background: #0d0505; border: 1px solid #300; padding: 20px; border-radius: 12px; border-left: 4px solid #ff1a1a; }
         .card.paid { border-left-color: #4caf50; opacity: 0.8; }
         
-        .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; margin-bottom: 10px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 10px; margin-bottom: 10px; }
         .card-title { color: #ff1a1a; font-weight: bold; font-size: 20px; font-family: 'Cinzel', serif; }
-        .cancel-btn { background: rgba(255, 0, 0, 0.1); border: 1px solid #ff1a1a; color: #ff1a1a; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 12px; font-weight: bold; transition: 0.2s; }
-        .cancel-btn:hover { background: #ff1a1a; color: #000; }
+        .cancel-btn { background: rgba(255,0,0,0.1); border: 1px solid #ff1a1a; color: #ff1a1a; border-radius: 4px; padding: 4px 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
         
-        /* Checkbox Pro Styling */
-        .discount-bar { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed #555; }
-        .discount-checkbox { width: 18px; height: 18px; accent-color: #ff1a1a; cursor: pointer; }
-        .discount-label { font-size: 13px; color: #bbb; cursor: pointer; }
+        .discount-box { display: flex; align-items: center; gap: 8px; background: #111; padding: 10px; border-radius: 6px; margin-bottom: 15px; border: 1px dashed #444; }
+        .discount-box input { width: 18px; height: 18px; accent-color: #ff1a1a; }
+        .discount-box label { font-size: 13px; color: #aaa; cursor: pointer; }
+
+        .btn-paid { flex: 1; background: #0e2412; color: #4caf50; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-done { flex: 1; background: #330000; color: #ff4444; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
         
-        .action-row { display: flex; gap: 10px; }
-        .btn-paid { flex: 1; background: #0e2412; color: #4caf50; border: 1px solid #4caf50; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .btn-done { flex: 1; background: #2a0808; color: #ff4444; border: 1px solid #ff4444; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        
-        /* Lock Screen */
-        #pinScreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #030000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .pin-box { background: #0a0a0a; padding: 40px; border-radius: 15px; border: 1px solid #ff1a1a; text-align: center; box-shadow: 0 0 40px rgba(255, 0, 0, 0.2); }
-        .pin-box input { background: transparent; border: 2px solid #330000; color: #fff; padding: 15px; font-size: 24px; text-align: center; width: 100%; border-radius: 8px; margin: 20px 0; outline: none; letter-spacing: 10px; font-family: 'Cinzel', serif; }
-        .pin-box button { background: #ff1a1a; color: #000; border: none; padding: 15px 30px; font-weight: bold; font-family: 'Cinzel', serif; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; }
+        #pinScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .pin-box { background: #0a0a0a; padding: 30px; border-radius: 12px; border: 1px solid #f00; text-align: center; }
+        .pin-box input { background: transparent; border: 2px solid #300; color: #fff; padding: 15px; font-size: 24px; text-align: center; width: 100%; margin: 20px 0; border-radius: 6px; }
+        .pin-box button { background: #ff1a1a; color: #000; border: none; padding: 15px; font-weight: bold; width: 100%; border-radius: 6px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -52,9 +45,8 @@
     <div id="pinScreen">
         <div class="pin-box">
             <h1 style="color:#ff1a1a; font-family:'Cinzel', serif;">ADMIN VAULT</h1>
-            <p style="color:#666; font-size:12px; margin-top:5px">RESTRICTED ACCESS ONLY</p>
             <input type="password" id="pinInput" placeholder="****" maxlength="4">
-            <button onclick="checkPin()">UNLOCK SYSTEM</button>
+            <button onclick="checkPin()">UNLOCK</button>
         </div>
     </div>
 
@@ -65,17 +57,16 @@
         </div>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="showTab('ordersTab', event)">LIVE ORDERS</button>
+            <button class="tab-btn active" onclick="showTab('orderGrid', event)">LIVE ORDERS</button>
             <button class="tab-btn" onclick="showTab('analyticsTab', event)">ANALYTICS</button>
         </div>
 
-        <div id="ordersTab" class="grid"></div>
+        <div id="orderGrid" class="grid"></div>
         
-        <div id="analyticsTab" style="display:none; padding:20px;">
-            <div style="background:#111; padding:20px; border-radius:12px; border:1px solid #333; text-align:center;">
-                <h3 style="color:#aaa; font-size:14px">TOTAL REVENUE</h3>
-                <h1 id="totalRevenue" style="color:#4caf50; font-size:40px; margin-top:10px">₹0</h1>
-                <p style="color:#666; font-size:12px; margin-top:10px">Requires 'Paid' status</p>
+        <div id="analyticsTab" style="display:none; text-align:center; padding: 40px;">
+            <div style="background:#111; padding:30px; border-radius:12px; border:1px solid #333;">
+                <h3 style="color:#aaa;">TOTAL REVENUE</h3>
+                <h1 id="totalRevenue" style="color:#4caf50; font-size:45px; margin-top:10px">₹0</h1>
             </div>
         </div>
     </div>
@@ -85,8 +76,7 @@
         if(document.getElementById('pinInput').value === '0707') {
             document.getElementById('pinScreen').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
-            if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
-        } else { alert("❌ ACCESS DENIED!"); document.getElementById('pinInput').value = ''; }
+        } else { alert("❌ WRONG PIN"); document.getElementById('pinInput').value = ''; }
     }
 
     const firebaseConfig = {
@@ -101,7 +91,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // ALARM LOGIC
     let alarmEnabled = false; let isAlarmRinging = false;
     const alertSound = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
     alertSound.loop = true; let prevOrderCount = 0; let firstLoad = true;
@@ -119,16 +108,16 @@
     function stopSound() { alertSound.pause(); alertSound.currentTime = 0; isAlarmRinging = false; }
 
     function showTab(id, e) {
-        ['ordersTab','analyticsTab'].forEach(t => document.getElementById(t).style.display = 'none');
-        document.getElementById(id).style.display = id==='ordersTab' ? 'grid' : 'block';
+        document.getElementById('orderGrid').style.display = 'none';
+        document.getElementById('analyticsTab').style.display = 'none';
+        document.getElementById(id).style.display = id === 'orderGrid' ? 'grid' : 'block';
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
         if(id === 'analyticsTab') loadAnalytics();
     }
 
-    // THE PRO LISTENER (WITH CANCEL & CHECKBOX)
     db.ref('orders').on('value', snap => {
-        const grid = document.getElementById('ordersTab');
+        const grid = document.getElementById('orderGrid');
         grid.innerHTML = '';
         const data = snap.val();
         let currentCount = data ? Object.keys(data).length : 0;
@@ -139,17 +128,16 @@
         }
         prevOrderCount = currentCount; firstLoad = false;
 
-        if(!data) return grid.innerHTML = '<p style="color:#666; text-align:center; width:100%; margin-top:50px;">Waiting for spirits (No Orders)...</p>';
+        if(!data) return grid.innerHTML = '<p style="color:#666; text-align:center; width:100%; margin-top:20px;">Waiting for orders...</p>';
 
         for(let id in data) {
             const o = data[id];
             const isPaid = o.payment === "Paid";
             
-            // Checkbox logic: Agar paid nahi hai aur amount >= 199 hai toh dikhao
-            const canDiscount = o.totalAmount >= 199 && !isPaid;
-            // Agar checkbox pehle se checked tha db me (optional) ya local logic use karein
-            const currentTotal = o.discountedAmount || o.totalAmount; 
+            // Checkbox & Price Logic
+            const displayTotal = o.discountedAmount || o.totalAmount;
             const isDiscounted = o.discountedAmount ? true : false;
+            const showCheckbox = (!isPaid && o.totalAmount >= 199) || isDiscounted;
 
             grid.innerHTML += `
                 <div class="card ${isPaid ? 'paid' : ''}">
@@ -158,25 +146,24 @@
                         <button class="cancel-btn" onclick="cancelOrder('${id}')">❌ CANCEL</button>
                     </div>
                     
-                    <div style="font-size:11px; color:#888; margin-bottom:10px">Time: ${o.time}</div>
-                    <div style="margin-bottom:15px; font-size:15px; color:#ddd; line-height:1.4">${o.items}</div>
+                    <div style="font-size:11px; color:#666; margin-bottom:10px">${o.time}</div>
+                    <div style="margin-bottom:15px; font-size:15px; color:#ccc; line-height:1.4;">${o.items}</div>
                     
-                    <div style="font-size:28px; font-weight:bold; margin-bottom:10px; color:#fff;">₹<span id="price-${id}">${currentTotal}</span></div>
+                    <div style="font-size:26px; font-weight:bold; color:#fff; margin-bottom:12px;">₹${displayTotal}</div>
                     
-                    <div class="discount-bar" style="display: ${canDiscount || isDiscounted ? 'flex' : 'none'}; opacity: ${isPaid ? '0.5' : '1'}">
-                        <input type="checkbox" class="discount-checkbox" id="check-${id}" ${isDiscounted ? 'checked' : ''} ${isPaid ? 'disabled' : ''} onchange="toggleDiscount('${id}', ${o.totalAmount}, this)">
-                        <label for="check-${id}" class="discount-label">Apply 10% Dark Magic OFF</label>
+                    <div class="discount-box" style="display: ${showCheckbox ? 'flex' : 'none'}; opacity: ${isPaid ? '0.5' : '1'}">
+                        <input type="checkbox" id="chk-${id}" ${isDiscounted ? 'checked' : ''} ${isPaid ? 'disabled' : ''} onchange="toggleDiscount('${id}', ${o.totalAmount}, this)">
+                        <label for="chk-${id}">Apply 10% OFF</label>
                     </div>
                     
-                    <div class="action-row">
+                    <div style="display:flex; gap:10px">
                         <button class="btn-paid" onclick="markPaid('${id}')">${o.payment}</button>
-                        <button class="btn-done" onclick="completeOrder('${id}', '${o.table}', '${o.items}')">DONE & WHATSAPP</button>
+                        <button class="btn-done" onclick="completeOrder('${id}', '${o.table}', '${displayTotal}', '${o.items}')">DONE & WHATSAPP</button>
                     </div>
                 </div>`;
         }
     });
 
-    // Smart Checkbox Action (DB Update)
     function toggleDiscount(id, originalAmount, checkbox) {
         if(checkbox.checked) {
             const newTotal = Math.round(originalAmount * 0.9);
@@ -187,37 +174,21 @@
     }
 
     function cancelOrder(id) {
-        if(confirm("Bhai, pakka ye order CANCEL/DELETE karna hai?")) {
-            db.ref('orders/' + id).remove();
-        }
+        if(confirm("Bhai, kya sach mein order DELETE karna hai?")) db.ref('orders/' + id).remove();
     }
 
-    function markPaid(id) {
-        db.ref('orders/' + id).update({ payment: 'Paid' });
-    }
+    function markPaid(id) { db.ref('orders/' + id).update({ payment: 'Paid' }); }
 
-    // WHATSAPP BILLING (Gets the final price on the spot)
-    function completeOrder(id, table, items) {
+    function completeOrder(id, table, amount, items) {
         db.ref('orders/' + id).once('value').then(s => {
-            const data = s.val();
-            if(data.payment !== "Paid") return alert("⚠️ Pehle Payment mark karo bhai!");
+            if(s.val().payment !== "Paid") return alert("⚠️ Pehle Payment mark karo bhai!");
             
-            // Checks if discounted amount exists, else takes normal total
-            const finalAmount = data.discountedAmount || data.totalAmount;
-            const discountText = data.discountedAmount ? "(10% OFF Applied)" : "";
-            
+            db.ref('analytics').push({ amount: parseInt(amount) });
             const num = prompt("Enter Customer WhatsApp Number:");
-            if(!num) return;
-            
-            const msg = `☠️ *BHOOT BANGLA RECEIPT* ☠️\n\n` +
-                        `*${table}*\n` +
-                        `---------------------\n` +
-                        `${items.replace(/, /g, '\n')}\n` +
-                        `---------------------\n` +
-                        `*TOTAL: ₹${finalAmount}* ${discountText}\n\n` +
-                        `_Thank you for surviving with us!_`;
-            
-            window.open(`https://wa.me/91${num}?text=${encodeURIComponent(msg)}`, '_blank');
+            if(num) {
+                const msg = `☠️ BHOOT BANGLA RECEIPT ☠️\n\n${table}\n---------------------\n${items.replace(/, /g, '\n')}\n---------------------\nTOTAL: ₹${amount}\n\nThank you for surviving with us!`;
+                window.open(`https://wa.me/91${num}?text=${encodeURIComponent(msg)}`, '_blank');
+            }
             db.ref('orders/' + id).remove();
         });
     }
