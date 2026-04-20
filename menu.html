@@ -113,7 +113,12 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-
+    const getToday = () => {
+        let d = new Date();
+        return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
+    };
+    const today = getToday();
+    
     const table = new URLSearchParams(window.location.search).get('table');
     document.getElementById('tableDisplay').innerText = table ? "TABLE " + table : "SCAN QR";
 
@@ -212,7 +217,7 @@
         
         let formattedItems = Object.keys(cartItems).map(key => `${key} x${cartItems[key]}`).join(", ");
 
-        db.ref('orders').push({
+        db.ref('orders/' + today).push({
             table: "Table " + table, items: formattedItems, totalAmount: cartTotal, 
             time: new Date().toLocaleTimeString(), payment: 'Unpaid'
         }).then(() => { 
