@@ -208,13 +208,14 @@
         updateCartUI();
     }
 
-    function summonOrder() {
+ function summonOrder() {
     if(!table) return alert("⚠️ Please scan the Table QR first!");
     
-    // 1. AAJ KI DATE (Admin se match honi chahiye)
-    const today = new Date().getFullYear() + "-" + String(new Date().getMonth() + 1).padStart(2, '0') + "-" + String(new Date().getDate()).padStart(2, '0');
+    // 1. AAJ KI DATE (Iske bina Admin panel ko order nahi milega)
+    let d = new Date();
+    let today = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
 
-    // 2. ITEMS KO SAHI FORMAT MEIN BADALNA
+    // 2. ITEMS KO SAHI FORMAT MEIN BADALNA (Admin compatibility)
     let itemsArray = Object.keys(cartItems).map(key => {
         return {
             name: key,
@@ -223,24 +224,30 @@
         };
     });
 
-    // 3. SAHI RASTE (PATH) PAR BHEJNA
-    // Yahan 'orders/' + today hona zaroori hai
+    // 3. ORDER BHEJNA (Sahi Path aur 'live' Status ke saath)
     db.ref('orders/' + today).push({
         table: "Table " + table,
-        items: itemsArray, // Ye array hona chahiye
+        items: itemsArray, 
         totalAmount: cartTotal,
-        status: 'live',    // 🔥 YE SABSE ZAROORI HAI, iske bina Admin panel chhupe hue order nahi dikhayega
+        status: 'live',    // 🔥 Sabse Zaroori: Iske bina Admin panel order nahi dikhayega
         time: new Date().toLocaleTimeString(),
         payment: 'Unpaid'
     }).then(() => {
+        // Sucess Message
         document.getElementById('customToast').classList.add('active');
+        
+        // Cart Khali karna
         cartItems = {};
         cartTotal = 0;
         updateCartUI();
+        
+        if(navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+    }).catch((error) => {
+        alert("Bhoot ne order rok liya! Error: " + error.message);
     });
-    }
+ }
     
-
+    
     function closeToast() {
         document.getElementById('customToast').classList.remove('active');
         location.reload(); 
