@@ -216,47 +216,41 @@
     // --- MAIN ENGINE STARTER ---
     window.startSystem = function() {
         // 1. Load Live Orders & ALARM SYSTEM
+                // 1. Load Live Orders (SAB ORDER DIKHAYEGA VERSION)
         onValue(ref(db, 'orders/' + today), (snap) => {
             let list = document.getElementById('orders-list'); 
             list.innerHTML = '';
-            let currentLiveCount = 0; // Count live orders
             
             snap.forEach(child => {
                 let o = child.val();
                 let id = child.key;
-                if(o.status === 'live' || !o.status){
-                    currentLiveCount++; // order mil gaya
-                    let typeBadge = o.table.toUpperCase().includes('PARCEL') ? '🥡 PARCEL' : '🍽️ DINE-IN';
-                    let sub = o.items.reduce((a,b) => a + (b.price * b.qty), 0);
+                
+                // Completed orders ko chhod kar baaki sab dikhao
+                if(o.status !== 'completed'){ 
+                    let typeBadge = (o.table && o.table.toUpperCase().includes('PARCEL')) ? '🥡 PARCEL' : '🍽️ DINE-IN';
                     
-                    let itemsHtml = o.items.map(i => `<li>${i.name} <strong>x${i.qty}</strong> <span style="float:right;">₹${i.price * i.qty}</span></li>`).join('');
+                    let itemsHtml = "";
+                    if(Array.isArray(o.items)){
+                        itemsHtml = o.items.map(i => `<li>${i.name} <strong>x${i.qty}</strong> <span style="float:right;">₹${i.price * i.qty}</span></li>`).join('');
+                    } else {
+                        itemsHtml = `<li>${o.items || "No Items"}</li>`;
+                    }
+                    
+                    let sub = o.totalAmount || 0;
                     
                     list.innerHTML += `<div class="glass-card">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <h2 style="margin:0; text-shadow:none;">${typeBadge} - ${o.table.toUpperCase()}</h2>
-                        </div>
-                        <p style="color:#aaa; font-size:14px; margin-top:5px;">Contact: ${o.phone || 'N/A'}</p>
+                        <h2 style="margin:0; color:#ff003c;">${typeBadge} - ${o.table || 'Unknown'}</h2>
+                        <p style="color:#888; font-size:14px; margin-top:5px;">Time: ${o.time || '--'}</p>
                         <ul>${itemsHtml}</ul>
-                        <div style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 8px; margin: 15px 0;">
-                            <h3 style="margin:0; color:#fff; text-shadow:none; text-align:left;">Subtotal: ₹${sub}</h3>
-                            <div style="margin-top: 10px; display:flex; align-items:center; gap:10px;">
-                                <label style="color:#aaa;">Discount (0-12%): </label>
-                                <input type="number" id="d-${id}" value="0" min="0" max="12" style="width:70px; padding:8px; margin:0;">
-                            </div>
+                        <div style="background: rgba(255,0,60,0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid rgba(255,0,60,0.2);">
+                            <h3 style="margin:0; color:#fff;">Total: ₹${sub}</h3>
                         </div>
-                        <button class="neon-btn" style="width:100%;" onclick="printBill('${id}', ${sub}, '${o.table}', '${typeBadge}')">🖨️ PRINT BILL & COMPLETE</button>
+                        <button class="neon-btn" style="width:100%;" onclick="printBill('${id}', ${sub}, '${o.table}', '${typeBadge}')">🖨️ PRINT BILL</button>
                     </div>`;
                 }
             });
-
-            // 🔥 ALARM LOGIC (Sirf tab bajega jab naya order aayega)
-            if(currentLiveCount > previousOrderCount && previousOrderCount !== 0) {
-                let bell = document.getElementById('order-alert');
-                if(bell) bell.play().catch(e => console.log("Click screen first to play audio"));
-            }
-            previousOrderCount = currentLiveCount; // Update memory
         });
-
+        
         // 2. Load Menu (FIXED FOR PARCEL TAB)
         onValue(ref(db, 'menu_items'), (snap) => {
             let qm = document.getElementById('quick-menu-list'); 
