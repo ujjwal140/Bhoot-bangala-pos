@@ -208,17 +208,17 @@
         updateCartUI();
     }
 
- function summonOrder() {
+function summonOrder() {
     if(!table) return alert("⚠️ Please scan the Table QR first!");
     let btn = document.getElementById('summonBtn');
-    btn.innerText = "SENDING TO BEYOND...";
+    btn.innerText = "SENDING...";
     btn.disabled = true;
 
-    // 1. AAJ KI DATE (Format: 2026-04-21)
+    // 1. Date (Format: 2026-04-21)
     let d = new Date();
-    let today = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
+    let todayDate = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
 
-    // 2. ITEMS KO SAHI LIST (ARRAY) MEIN BADALNA
+    // 2. Items ko List (Array) banana
     let itemsArray = Object.keys(cartItems).map(key => {
         return {
             name: key,
@@ -227,12 +227,12 @@
         };
     });
 
-    // 3. SAHI RASTE PAR 'LIVE' STATUS KE SAATH BHEJNA
-    db.ref('orders/' + today).push({
+    // 3. Database mein Push karna
+    firebase.database().ref('orders/' + todayDate).push({
         table: "Table " + table,
-        items: itemsArray, 
+        items: itemsArray,
         totalAmount: cartTotal,
-        status: 'live',    // 🔥 Admin mein dikhane ke liye sabse zaroori
+        status: 'live',
         time: new Date().toLocaleTimeString(),
         payment: 'Unpaid'
     }).then(() => {
@@ -242,13 +242,13 @@
         updateCartUI();
         btn.innerText = "SUMMON THE SPIRITS";
         btn.disabled = false;
-        if(navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
-    }).catch((err) => {
-        alert("Error: " + err.message);
+        if(navigator.vibrate) navigator.vibrate([100, 50, 100, 50]);
+    }).catch((e) => {
+        alert("Error: " + e.message);
         btn.disabled = false;
     });
 }
-
+ 
     function closeToast() {
         document.getElementById('customToast').classList.remove('active');
         location.reload(); 
