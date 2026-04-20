@@ -3,280 +3,354 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bhoot Bangla - Admin Pro</title>
+    <title>Bhoot Bangla - Pro Command Center</title>
     <style>
-        /* CORE DARK HORROR THEME */
-        :root {
-            --bg-color: #0d0d0d;
-            --card-bg: rgba(20, 20, 20, 0.8);
-            --neon-red: #ff003c;
-            --text-main: #e0e0e0;
-            --glass-border: rgba(255, 0, 60, 0.3);
-        }
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0; padding: 20px;
-        }
-        h1, h2, h3 { color: var(--neon-red); text-align: center; text-transform: uppercase; letter-spacing: 2px;}
+        /* 🦇 PREMIUM DARK HORROR THEME & GLASSMORPHISM */
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap');
         
-        /* GLASSMORPHISM CARDS */
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
+        :root {
+            --bg-dark: #050505;
+            --neon-red: #ff003c;
+            --glass-bg: rgba(15, 15, 15, 0.65);
+            --glass-border: rgba(255, 0, 60, 0.25);
+            --text-light: #e0e0e0;
+        }
+
+        body { 
+            background-color: var(--bg-dark); 
+            background-image: radial-gradient(circle at 50% 0%, #2a0008 0%, transparent 50%);
+            color: var(--text-light); 
+            font-family: 'Rajdhani', sans-serif; 
+            padding: 20px; 
+            margin: 0; 
+        }
+        
+        h1, h2, h3 { color: var(--neon-red); text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255, 0, 60, 0.4); text-align: center; }
+        
+        /* PREMIUM GLASS CARDS */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border);
             border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 15px rgba(255, 0, 60, 0.1);
+            padding: 20px;
+            margin: 15px auto;
+            max-width: 600px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-
-        /* BUTTONS & INPUTS */
-        button {
+        .glass-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px 0 rgba(255, 0, 60, 0.15); }
+        
+        /* NEON BUTTONS */
+        .neon-btn {
             background: transparent; color: var(--neon-red);
-            border: 1px solid var(--neon-red); padding: 8px 15px;
-            border-radius: 5px; cursor: pointer; transition: 0.3s;
-            font-weight: bold;
+            border: 1px solid var(--neon-red);
+            padding: 12px 20px; font-weight: 700; font-size: 16px;
+            border-radius: 6px; cursor: pointer; transition: all 0.3s ease;
+            box-shadow: 0 0 8px rgba(255, 0, 60, 0.1);
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase; letter-spacing: 1px;
         }
-        button:hover { background: var(--neon-red); color: white; }
-        input[type="number"], input[type="date"], input[type="text"] {
-            background: #1a1a1a; color: white; border: 1px solid #333;
-            padding: 8px; border-radius: 4px;
+        .neon-btn:hover { background: var(--neon-red); color: #fff; box-shadow: 0 0 20px rgba(255, 0, 60, 0.6); }
+        .neon-btn:active { transform: scale(0.95); }
+        
+        .tab-btn { width: 23%; font-size: 14px; padding: 12px 5px; margin: 4px; }
+        @media (max-width: 600px) { .tab-btn { width: 45%; margin: 5px 2px; } }
+
+        /* SLEEK INPUTS */
+        input, select { 
+            background: rgba(0, 0, 0, 0.7); color: #fff; 
+            border: 1px solid var(--glass-border); 
+            padding: 12px; border-radius: 6px; width: 90%; 
+            margin: 8px 0; max-width: 400px; font-family: inherit; font-size: 16px;
+            outline: none; transition: border 0.3s;
         }
+        input:focus, select:focus { border-color: var(--neon-red); box-shadow: 0 0 8px rgba(255, 0, 60, 0.3); }
 
-        /* GRID SYSTEM */
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        @media (max-width: 768px) { .dashboard-grid { grid-template-columns: 1fr; } }
+        ul { list-style-type: none; padding-left: 0; }
+        ul li { background: rgba(255,255,255,0.03); margin: 5px 0; padding: 8px; border-radius: 4px; border-left: 2px solid var(--neon-red); }
 
-        /* THERMAL PRINTER CSS - MAGIC LIES HERE */
+        /* 🖨️ THERMAL PRINTER MAGIC (Hidden on screen) */
         #print-receipt { display: none; }
         @media print {
-            body * { visibility: hidden; } 
-            #print-receipt, #print-receipt * { visibility: visible; } 
+            body * { visibility: hidden; }
+            #print-receipt, #print-receipt * { visibility: visible; }
             #print-receipt {
-                display: block; position: absolute; left: 0; top: 0;
-                width: 300px; 
-                background: white; color: black; font-family: monospace;
-                padding: 10px; font-size: 14px;
+                display: block; position: absolute; left: 0; top: 0; width: 300px; 
+                background: #fff; color: #000; font-family: monospace; padding: 5px; font-size: 14px; text-shadow: none;
             }
-            .bill-header { text-align: center; border-bottom: 1px dashed black; padding-bottom: 5px; margin-bottom: 5px; }
-            .bill-item { display: flex; justify-content: space-between; margin-bottom: 3px; }
-            .bill-total { border-top: 1px dashed black; padding-top: 5px; font-weight: bold; margin-top: 5px; }
+            .b-line { border-bottom: 1px dashed #000; margin: 5px 0; }
+            .b-item { display: flex; justify-content: space-between; margin: 3px 0; }
+            h2, h3, p, span { color: #000 !important; } /* Force black text for print */
         }
     </style>
 </head>
 <body>
 
-    <div id="login-screen" style="height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column;">
-        <h1>Enter Vault PIN</h1>
-        <input type="password" id="vault-pin" placeholder="****" style="font-size: 20px; text-align: center; width: 100px;">
-        <br><button onclick="checkPin()">UNLOCK</button>
+<div id="login-screen" style="height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+    <div class="glass-card" style="text-align: center; padding: 40px;">
+        <h1>🦇 VAULT ACCESS</h1>
+        <p style="color: #888;">Enter Pin to Access Command Center</p>
+        <input type="password" id="pin" placeholder="****" style="text-align:center; font-size: 24px; width: 150px; letter-spacing: 8px;">
+        <br><br>
+        <button class="neon-btn" style="width: 150px;" onclick="unlock()">UNLOCK</button>
+    </div>
+</div>
+
+<div id="admin-panel" style="display:none; max-width: 900px; margin: 0 auto;">
+    <h1 style="font-size: 2.5rem; margin-bottom: 5px;">🦇 BHOOT BANGLA PRO</h1>
+    <p style="text-align: center; color: #888; margin-top: 0; margin-bottom: 30px;">System Online • All Systems Nominal</p>
+    
+    <div style="text-align: center; margin-bottom: 25px;">
+        <button class="neon-btn tab-btn" onclick="showTab('live')">🔴 LIVE ORDERS</button>
+        <button class="neon-btn tab-btn" onclick="showTab('create')">🥡 NEW PARCEL</button>
+        <button class="neon-btn tab-btn" onclick="showTab('sales')">📊 LEDGER</button>
+        <button class="neon-btn tab-btn" onclick="showTab('menu')">📋 MENU SETUP</button>
     </div>
 
-    <div id="main-dashboard" style="display: none;">
-        <h1>🦇 Bhoot Bangla Command Center</h1>
-        
-        <div style="text-align: center; margin-bottom: 20px;">
-            <button onclick="switchTab('live-orders')">🔴 Live Orders</button>
-            <button onclick="switchTab('sales-ledger')">📊 Sales Ledger</button>
-            <button onclick="switchTab('menu-manager')">📋 Menu Manager</button>
-        </div>
+    <div id="tab-live" class="tab">
+        <h2>🔴 ACTIVE TARGETS</h2>
+        <div id="orders-list"></div>
+    </div>
 
-        <div id="live-orders" class="tab-content">
-            <h2>Live Targets (Orders)</h2>
-            <div class="dashboard-grid" id="orders-container"></div>
+    <div id="tab-create" class="tab" style="display:none;">
+        <h2>🥡 PARCEL COMMAND</h2>
+        <div class="glass-card" style="text-align: center;">
+            <input type="text" id="p-phone" placeholder="Customer Name / Phone">
+            <div id="quick-menu-list" style="margin: 20px 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;"></div>
+            <div style="border-top: 1px dashed var(--glass-border); margin: 15px 0;"></div>
+            <h2 id="p-total" style="font-size: 28px; text-shadow: none;">Total: ₹0</h2>
+            <button class="neon-btn" style="width: 100%; font-size: 20px; padding: 15px;" onclick="submitParcel()">🔥 DISPATCH TO KITCHEN</button>
         </div>
+    </div>
 
-        <div id="sales-ledger" class="tab-content" style="display: none;">
-            <h2>Vault History</h2>
-            <div class="card" style="text-align: center;">
-                <label>Select Date: </label>
-                <input type="date" id="history-date" onchange="loadHistory()">
-                <h3 style="color: white;">Total Revenue: ₹<span id="day-total" style="color: var(--neon-red);">0</span></h3>
+    <div id="tab-sales" class="tab" style="display:none;">
+        <h2>📊 VAULT HISTORY</h2>
+        <div class="glass-card" style="text-align: center;">
+            <p style="margin: 0 0 10px 0; color: #aaa;">Select Date to View Logs</p>
+            <input type="date" id="s-date" onchange="loadSales()" style="font-size: 18px;">
+            <div style="background: rgba(0, 255, 100, 0.1); border: 1px solid rgba(0, 255, 100, 0.3); border-radius: 8px; padding: 15px; margin-top: 15px;">
+                <h3 style="color: #fff; margin: 0; text-shadow: none;">TOTAL REVENUE: <span style="color: #00ff66;">₹<span id="day-cash">0</span></span></h3>
             </div>
-            <div id="history-container"></div>
         </div>
-
-        <div id="menu-manager" class="tab-content" style="display: none;">
-            <h2>Grimoire (Menu Manager)</h2>
-            <div class="card dashboard-grid">
-                <div>
-                    <input type="text" id="new-item-name" placeholder="Item Name">
-                    <input type="number" id="new-item-price" placeholder="Price (₹)">
-                    <button onclick="addMenuItem()">Add to Menu</button>
-                </div>
-            </div>
-            <div id="menu-list-container" class="dashboard-grid"></div>
-        </div>
+        <div id="sales-list"></div>
     </div>
 
-    <div id="print-receipt">
-        <div class="bill-header">
-            <h2>BHOOT BANGLA</h2>
-            <p>Bagaha's Scariest Cafe</p>
-            <p id="bill-datetime"></p>
-            <p><strong>Order Type: </strong><span id="bill-type"></span></p>
-            <p><strong>Table/Parcel No: </strong><span id="bill-table"></span></p>
+    <div id="tab-menu" class="tab" style="display:none;">
+        <h2>📋 GRIMOIRE SETUP</h2>
+        <div class="glass-card" style="text-align: center;">
+            <input type="text" id="m-category" placeholder="Category (e.g. Burger, Pizza, Shakes)">
+            <input type="text" id="m-name" placeholder="Dish Name">
+            <input type="number" id="m-price" placeholder="Price (₹)">
+            <button class="neon-btn" style="width: 90%; margin-top: 15px;" onclick="addMenu()">➕ ADD TO MENU</button>
         </div>
-        <div id="bill-items"></div>
-        <div class="bill-total">
-            <div class="bill-item"><span>Subtotal:</span><span id="bill-subtotal"></span></div>
-            <div class="bill-item"><span>Discount (<span id="bill-discount-percent">0</span>%):</span><span id="bill-discount-amt"></span></div>
-            <div class="bill-item" style="font-size: 18px;"><span>TOTAL:</span><span id="bill-final"></span></div>
-        </div>
-        <div class="bill-header" style="margin-top: 10px; border: none;">
-            <p>Thank you! Visit Again... If you survive! 🦇</p>
-        </div>
+        <div id="menu-items-list"></div>
     </div>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue, set, push, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-const firebaseConfig = {
-          apiKey: "AIzaSyB8QGSysMPyI1EqQTCCEx-Z6W7iIrwoaIQ",
-          authDomain: "bhoot-bangla-41807.firebaseapp.com",
-          databaseURL: "https://bhoot-bangla-41807-default-rtdb.firebaseio.com",
-          projectId: "bhoot-bangla-41807",
-          storageBucket: "bhoot-bangla-41807.firebasestorage.app",
-          messagingSenderId: "1065037227059",
-          appId: "1:1065037227059:web:ce2c3bb59f773dcbcd2f46"
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+</div>
 
-        // Utility: Get Today's Date
-        const getTodayDate = () => new Date().toISOString().split('T')[0];
-        let todayDate = getTodayDate();
-        document.getElementById('history-date').value = todayDate;
+<div id="print-receipt">
+    <center>
+        <h2>BHOOT BANGLA CAFE</h2>
+        <p style="font-size: 10px; margin-top: -10px;">Bagaha's Scariest Cafe</p>
+        <span id="b-time" style="font-size: 12px;"></span><br>
+        <strong>TYPE: <span id="b-type"></span></strong><br>
+        <strong>TABLE/PARCEL: <span id="b-table"></span></strong>
+        <div class="b-line"></div>
+    </center>
+    <div id="b-items"></div>
+    <div class="b-line"></div>
+    <div class="b-item"><span>Subtotal:</span><span>₹<span id="b-sub"></span></span></div>
+    <div class="b-item"><span>Discount (<span id="b-disc"></span>%):</span><span>-₹<span id="b-disc-amt"></span></span></div>
+    <div class="b-line"></div>
+    <div class="b-item" style="font-size: 18px; font-weight: bold;"><span>TOTAL:</span><span>₹<span id="b-total"></span></span></div>
+    <div class="b-line"></div>
+    <center>
+        <p style="font-size: 12px;">Thank you! Visit Again...<br>If you survive! 🦇</p>
+    </center>
+</div>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set, push, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        window.switchTab = function(tabId) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
-            document.getElementById(tabId).style.display = 'block';
-        }
+    // ✅ TERA ASLI FIREBASE CONFIG
+    const firebaseConfig = {
+        apiKey: "AIzaSyB8QGSysMPyI1EqQTCCEx-Z6W7iIrwoaIQ",
+        authDomain: "bhoot-bangla-41807.firebaseapp.com",
+        databaseURL: "https://bhoot-bangla-41807-default-rtdb.firebaseio.com",
+        projectId: "bhoot-bangla-41807",
+        storageBucket: "bhoot-bangla-41807.appspot.com",
+        messagingSenderId: "1065037227059",
+        appId: "1:1065037227059:web:ce2c3bb59f773dcbed2f46"
+    };
 
-        window.checkPin = function() {
-            if(document.getElementById('vault-pin').value === '0707') {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-dashboard').style.display = 'block';
-                loadLiveOrders();
-                loadMenuManager();
-                loadHistory(); 
-            } else { alert('Access Denied!'); }
-        }
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    
+    const getToday = () => {
+        let d = new Date();
+        return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
+    };
+    const today = getToday();
+    document.getElementById('s-date').value = today;
 
-        function loadLiveOrders() {
-            const ordersRef = ref(db, 'orders/' + todayDate);
-            onValue(ordersRef, (snapshot) => {
-                const container = document.getElementById('orders-container');
-                container.innerHTML = '';
-                snapshot.forEach((childSnapshot) => {
-                    const order = childSnapshot.val();
-                    const orderId = childSnapshot.key;
+    // --- NAVIGATION & SECURITY ---
+    window.unlock = () => {
+        if(document.getElementById('pin').value === '0707'){
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'block';
+            startSystem();
+        } else { alert('ACCESS DENIED! WRONG PIN 🦇'); }
+    };
+
+    window.showTab = (id) => {
+        document.querySelectorAll('.tab').forEach(t => t.style.display = 'none');
+        document.getElementById('tab-' + id).style.display = 'block';
+        if(id === 'sales') loadSales();
+    };
+
+    // --- MAIN ENGINE STARTER ---
+    function startSystem() {
+        // 1. Load Live Orders
+        onValue(ref(db, 'orders/' + today), (snap) => {
+            let list = document.getElementById('orders-list'); 
+            list.innerHTML = '';
+            snap.forEach(child => {
+                let o = child.val();
+                let id = child.key;
+                if(o.status === 'live'){
+                    let typeBadge = o.table.toUpperCase().includes('PARCEL') ? '🥡 PARCEL' : '🍽️ DINE-IN';
+                    let sub = o.items.reduce((a,b) => a + (b.price * b.qty), 0);
                     
-                    if(order.status === 'live') {
-                        let typeBadge = order.table.toLowerCase().includes('parcel') ? '🥡 PARCEL' : '🍽️ DINE-IN';
-                        
-                        let card = `<div class="card">
-                            <h3>${typeBadge} - ${order.table.toUpperCase()}</h3>
-                            <p>Customer: ${order.phone || 'N/A'}</p>
-                            <hr style="border-color: #333;">
-                            <ul style="list-style: none; padding: 0;">`;
-                        
-                        let subtotal = 0;
-                        order.items.forEach(item => {
-                            card += `<li>${item.name} x ${item.qty} = ₹${item.price * item.qty}</li>`;
-                            subtotal += (item.price * item.qty);
-                        });
-
-                        card += `</ul>
-                            <p><strong>Subtotal: ₹${subtotal}</strong></p>
-                            
-                            <label style="font-size:12px;">Discount (0-12%):</label>
-                            <input type="number" id="disc-${orderId}" min="0" max="12" value="0" style="width: 50px;">
-                            
-                            <br><br>
-                            <button onclick="printAndComplete('${orderId}', '${order.table}', '${typeBadge}', ${subtotal})">🖨️ Print Bill & Complete</button>
-                        </div>`;
-                        container.innerHTML += card;
-                    }
-                });
-            });
-        }
-
-        window.printAndComplete = function(orderId, table, typeBadge, subtotal) {
-            let discountPercent = document.getElementById(`disc-${orderId}`).value;
-            if(discountPercent > 12) discountPercent = 12; 
-            if(discountPercent < 0) discountPercent = 0;
-
-            let discountAmount = (subtotal * discountPercent) / 100;
-            let finalTotal = Math.round(subtotal - discountAmount);
-
-            document.getElementById('bill-datetime').innerText = new Date().toLocaleString();
-            document.getElementById('bill-type').innerText = typeBadge;
-            document.getElementById('bill-table').innerText = table.toUpperCase();
-            document.getElementById('bill-items').innerHTML = `<p>Items as ordered...</p>`; 
-            document.getElementById('bill-subtotal').innerText = '₹' + subtotal;
-            document.getElementById('bill-discount-percent').innerText = discountPercent;
-            document.getElementById('bill-discount-amt').innerText = '-₹' + discountAmount;
-            document.getElementById('bill-final').innerText = '₹' + finalTotal;
-
-            window.print();
-
-            set(ref(db, `orders/${todayDate}/${orderId}/status`), 'completed');
-            set(ref(db, `orders/${todayDate}/${orderId}/finalTotal`), finalTotal);
-        }
-
-        window.loadHistory = function() {
-            let selectedDate = document.getElementById('history-date').value;
-            const historyRef = ref(db, 'orders/' + selectedDate);
-            
-            onValue(historyRef, (snapshot) => {
-                let totalRevenue = 0;
-                let container = document.getElementById('history-container');
-                container.innerHTML = '';
-
-                snapshot.forEach((childSnapshot) => {
-                    const order = childSnapshot.val();
-                    if(order.status === 'completed') {
-                        totalRevenue += (order.finalTotal || 0);
-                        container.innerHTML += `<div class="card" style="border-left: 4px solid green;">
-                            <strong>${order.table.toUpperCase()}</strong> - ₹${order.finalTotal || '0'}
-                        </div>`;
-                    }
-                });
-                document.getElementById('day-total').innerText = totalRevenue;
-            });
-        }
-
-        window.loadMenuManager = function() {
-            const menuRef = ref(db, 'menu');
-            onValue(menuRef, (snapshot) => {
-                const container = document.getElementById('menu-list-container');
-                container.innerHTML = '';
-                snapshot.forEach((childSnapshot) => {
-                    const item = childSnapshot.val();
-                    container.innerHTML += `<div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-                        <span><strong>${item.name}</strong> <br> ₹${item.price}</span>
-                        <button onclick="removeMenuItem('${childSnapshot.key}')">❌</button>
+                    let itemsHtml = o.items.map(i => `<li>${i.name} <strong>x${i.qty}</strong> <span style="float:right;">₹${i.price * i.qty}</span></li>`).join('');
+                    
+                    list.innerHTML += `<div class="glass-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h2 style="margin:0; text-shadow:none;">${typeBadge} - ${o.table.toUpperCase()}</h2>
+                        </div>
+                        <p style="color:#aaa; font-size:14px; margin-top:5px;">Contact: ${o.phone || 'N/A'}</p>
+                        <ul>${itemsHtml}</ul>
+                        <div style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                            <h3 style="margin:0; color:#fff; text-shadow:none; text-align:left;">Subtotal: ₹${sub}</h3>
+                            <div style="margin-top: 10px; display:flex; align-items:center; gap:10px;">
+                                <label style="color:#aaa;">Discount (0-12%): </label>
+                                <input type="number" id="d-${id}" value="0" min="0" max="12" style="width:70px; padding:8px; margin:0;">
+                            </div>
+                        </div>
+                        <button class="neon-btn" style="width:100%;" onclick="printBill('${id}', ${sub}, '${o.table}', '${typeBadge}')">🖨️ PRINT BILL & COMPLETE</button>
                     </div>`;
-                });
+                }
             });
-        }
+        });
 
-        window.addMenuItem = function() {
-            const name = document.getElementById('new-item-name').value;
-            const price = document.getElementById('new-item-price').value;
-            if(name && price) {
-                push(ref(db, 'menu'), { name: name, price: Number(price) });
-                document.getElementById('new-item-name').value = '';
-                document.getElementById('new-item-price').value = '';
-            }
-        }
+        // 2. Load Menu
+        onValue(ref(db, 'menu'), (snap) => {
+            let qm = document.getElementById('quick-menu-list'); qm.innerHTML = '';
+            let mm = document.getElementById('menu-items-list'); mm.innerHTML = '';
+            snap.forEach(child => {
+                let m = child.val();
+                let key = child.key;
+                let cat = m.category || 'Uncategorized';
+                
+                qm.innerHTML += `<button class="neon-btn" style="font-size:12px; padding: 10px; width: 30%; max-width: 120px;" onclick="addToParcel('${m.name}', ${m.price})">${m.name}<br><span style="color:#fff;">₹${m.price}</span></button>`;
+                
+                mm.innerHTML += `<div class="glass-card" style="display:flex; justify-content:space-between; align-items:center; padding: 15px;">
+                    <div>
+                        <span style="color:var(--neon-red); font-size:12px; font-weight:bold; letter-spacing:1px;">[${cat.toUpperCase()}]</span><br>
+                        <strong style="font-size:18px;">${m.name}</strong><br><span style="color:#aaa;">₹${m.price}</span>
+                    </div>
+                    <button class="neon-btn" onclick="removeMenu('${key}')" style="padding: 8px 12px; font-size: 18px; border:none; box-shadow:none;">❌</button>
+                </div>`;
+            });
+        });
+    }
 
-        window.removeMenuItem = function(key) {
-            remove(ref(db, 'menu/' + key));
+    // --- CREATE PARCEL LOGIC ---
+    let parcelItems = [];
+    window.addToParcel = (n, p) => {
+        let existingItem = parcelItems.find(i => i.name === n);
+        if(existingItem) { existingItem.qty += 1; } 
+        else { parcelItems.push({name: n, price: p, qty: 1}); }
+        
+        let total = parcelItems.reduce((a,b) => a + (b.price * b.qty), 0);
+        document.getElementById('p-total').innerText = 'Total: ₹' + total;
+    };
+
+    window.submitParcel = () => {
+        if(parcelItems.length === 0) return alert('Pehle item toh select kar bhai!');
+        let phone = document.getElementById('p-phone').value || 'Counter';
+        
+        push(ref(db, 'orders/' + today), {
+            table: 'PARCEL', phone: phone, items: parcelItems, status: 'live'
+        });
+        
+        parcelItems = []; document.getElementById('p-total').innerText = 'Total: ₹0';
+        document.getElementById('p-phone').value = '';
+        alert('🥡 Parcel Bhej Diya Kitchen Mein!');
+        showTab('live');
+    };
+
+    // --- PRINTER & BILLING LOGIC ---
+    window.printBill = (id, sub, table, typeBadge) => {
+        let disc = document.getElementById('d-'+id).value;
+        if(disc > 12) disc = 12; if(disc < 0) disc = 0;
+        
+        let discAmt = Math.round(sub * disc / 100);
+        let final = Math.round(sub - discAmt);
+        
+        document.getElementById('b-time').innerText = new Date().toLocaleString();
+        document.getElementById('b-type').innerText = typeBadge;
+        document.getElementById('b-table').innerText = table.toUpperCase();
+        document.getElementById('b-items').innerHTML = `<div class="b-item"><span>Items as Ordered</span></div>`;
+        document.getElementById('b-sub').innerText = sub;
+        document.getElementById('b-disc').innerText = disc;
+        document.getElementById('b-disc-amt').innerText = discAmt;
+        document.getElementById('b-total').innerText = final;
+        
+        window.print();
+        
+        set(ref(db, `orders/${today}/${id}/status`), 'completed');
+        set(ref(db, `orders/${today}/${id}/finalTotal`), final);
+    };
+
+    // --- SALES LEDGER LOGIC ---
+    window.loadSales = () => {
+        let date = document.getElementById('s-date').value;
+        onValue(ref(db, 'orders/' + date), (snap) => {
+            let total = 0; let list = document.getElementById('sales-list'); list.innerHTML = '';
+            
+            snap.forEach(child => {
+                let o = child.val();
+                if(o.status === 'completed') {
+                    total += o.finalTotal || 0;
+                    list.innerHTML += `<div class="glass-card" style="border-left: 4px solid #00ff66; padding: 15px;">
+                        <h3 style="margin:0; text-align:left; color:#fff; text-shadow:none;">${o.table.toUpperCase()} <span style="float:right; color:#00ff66;">₹${o.finalTotal}</span></h3>
+                        <span style="font-size:12px; color:#aaa;">Phone: ${o.phone || 'N/A'}</span>
+                    </div>`;
+                }
+            });
+            document.getElementById('day-cash').innerText = total;
+        });
+    };
+
+    // --- MENU MANAGER LOGIC ---
+    window.addMenu = () => {
+        let c = document.getElementById('m-category').value || 'Other';
+        let n = document.getElementById('m-name').value;
+        let p = document.getElementById('m-price').value;
+        
+        if(n && p) {
+            push(ref(db, 'menu'), { category: c, name: n, price: Number(p) });
+            document.getElementById('m-name').value = '';
+            document.getElementById('m-price').value = '';
+        } else {
+            alert('Bhai, Name aur Price dono daalna zaroori hai!');
         }
-    </script>
+    };
+
+    window.removeMenu = (key) => {
+        if(confirm("Are you sure you want to delete this dish?")) { remove(ref(db, 'menu/' + key)); }
+    };
+</script>
 </body>
 </html>
