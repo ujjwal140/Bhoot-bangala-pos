@@ -209,24 +209,37 @@
     }
 
     function summonOrder() {
-        if(!table) return alert("⚠️ Please scan the Table QR first!");
-        let btn = document.getElementById('summonBtn');
-        btn.innerText = "SENDING TO BEYOND...";
-        btn.style.opacity = "0.7";
-        btn.disabled = true;
-        
-        let formattedItems = Object.keys(cartItems).map(key => `${key} x${cartItems[key]}`).join(", ");
+    if(!table) return alert("⚠️ Please scan the Table QR first!");
+    
+    // 1. AAJ KI DATE (Admin se match honi chahiye)
+    const today = new Date().getFullYear() + "-" + String(new Date().getMonth() + 1).padStart(2, '0') + "-" + String(new Date().getDate()).padStart(2, '0');
 
-        db.ref('orders/' + today).push({
-            table: "Table " + table, items: formattedItems, totalAmount: cartTotal, 
-            time: new Date().toLocaleTimeString(), payment: 'Unpaid'
-        }).then(() => { 
-            if(navigator.vibrate) navigator.vibrate([100,50,100,50,200]);
-            
-            // SHOW THE PREMIUM POPUP INSTEAD OF ALERT
-            document.getElementById('customToast').classList.add('active');
-        });
+    // 2. ITEMS KO SAHI FORMAT MEIN BADALNA
+    let itemsArray = Object.keys(cartItems).map(key => {
+        return {
+            name: key,
+            price: itemPrices[key],
+            qty: cartItems[key]
+        };
+    });
+
+    // 3. SAHI RASTE (PATH) PAR BHEJNA
+    // Yahan 'orders/' + today hona zaroori hai
+    db.ref('orders/' + today).push({
+        table: "Table " + table,
+        items: itemsArray, // Ye array hona chahiye
+        totalAmount: cartTotal,
+        status: 'live',    // 🔥 YE SABSE ZAROORI HAI, iske bina Admin panel chhupe hue order nahi dikhayega
+        time: new Date().toLocaleTimeString(),
+        payment: 'Unpaid'
+    }).then(() => {
+        document.getElementById('customToast').classList.add('active');
+        cartItems = {};
+        cartTotal = 0;
+        updateCartUI();
+    });
     }
+    
 
     function closeToast() {
         document.getElementById('customToast').classList.remove('active');
