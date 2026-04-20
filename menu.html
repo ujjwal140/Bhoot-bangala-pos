@@ -210,40 +210,31 @@
 
  function summonOrder() {
     if(!table) return alert("⚠️ Please scan the Table QR first!");
-    
-    // 1. AAJ KI DATE (Iske bina Admin panel ko order nahi milega)
+    let btn = document.getElementById('summonBtn');
+    btn.innerText = "SENDING...";
+    btn.disabled = true;
+
     let d = new Date();
     let today = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
 
-    // 2. ITEMS KO SAHI FORMAT MEIN BADALNA (Admin compatibility)
+    // Items ko proper List (Array) banana taaki Admin Panel padh sake
     let itemsArray = Object.keys(cartItems).map(key => {
-        return {
-            name: key,
-            price: itemPrices[key],
-            qty: cartItems[key]
-        };
+        return { name: key, price: itemPrices[key], qty: cartItems[key] };
     });
 
-    // 3. ORDER BHEJNA (Sahi Path aur 'live' Status ke saath)
     db.ref('orders/' + today).push({
         table: "Table " + table,
         items: itemsArray, 
         totalAmount: cartTotal,
-        status: 'live',    // 🔥 Sabse Zaroori: Iske bina Admin panel order nahi dikhayega
+        status: 'live', // 🔥 Ye line Admin mein order dikhayegi
         time: new Date().toLocaleTimeString(),
         payment: 'Unpaid'
     }).then(() => {
-        // Sucess Message
         document.getElementById('customToast').classList.add('active');
-        
-        // Cart Khali karna
-        cartItems = {};
-        cartTotal = 0;
+        cartItems = {}; cartTotal = 0;
         updateCartUI();
-        
-        if(navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
-    }).catch((error) => {
-        alert("Bhoot ne order rok liya! Error: " + error.message);
+        btn.innerText = "SUMMON THE SPIRITS";
+        btn.disabled = false;
     });
  }
     
