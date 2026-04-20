@@ -224,7 +224,7 @@
             snap.forEach(child => {
                 let o = child.val();
                 let id = child.key;
-                if(o.status === 'live'){
+                if(o.status === 'live' || !o.status){
                     currentLiveCount++; // order mil gaya
                     let typeBadge = o.table.toUpperCase().includes('PARCEL') ? '🥡 PARCEL' : '🍽️ DINE-IN';
                     let sub = o.items.reduce((a,b) => a + (b.price * b.qty), 0);
