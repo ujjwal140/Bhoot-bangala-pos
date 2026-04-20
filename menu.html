@@ -211,34 +211,44 @@
  function summonOrder() {
     if(!table) return alert("⚠️ Please scan the Table QR first!");
     let btn = document.getElementById('summonBtn');
-    btn.innerText = "SENDING...";
+    btn.innerText = "SENDING TO BEYOND...";
     btn.disabled = true;
 
+    // 1. AAJ KI DATE (Format: 2026-04-21)
     let d = new Date();
     let today = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
 
-    // Items ko proper List (Array) banana taaki Admin Panel padh sake
+    // 2. ITEMS KO SAHI LIST (ARRAY) MEIN BADALNA
     let itemsArray = Object.keys(cartItems).map(key => {
-        return { name: key, price: itemPrices[key], qty: cartItems[key] };
+        return {
+            name: key,
+            price: itemPrices[key],
+            qty: cartItems[key]
+        };
     });
 
+    // 3. SAHI RASTE PAR 'LIVE' STATUS KE SAATH BHEJNA
     db.ref('orders/' + today).push({
         table: "Table " + table,
         items: itemsArray, 
         totalAmount: cartTotal,
-        status: 'live', // 🔥 Ye line Admin mein order dikhayegi
+        status: 'live',    // 🔥 Admin mein dikhane ke liye sabse zaroori
         time: new Date().toLocaleTimeString(),
         payment: 'Unpaid'
     }).then(() => {
         document.getElementById('customToast').classList.add('active');
-        cartItems = {}; cartTotal = 0;
+        cartItems = {};
+        cartTotal = 0;
         updateCartUI();
         btn.innerText = "SUMMON THE SPIRITS";
         btn.disabled = false;
+        if(navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+    }).catch((err) => {
+        alert("Error: " + err.message);
+        btn.disabled = false;
     });
- }
-    
-    
+}
+
     function closeToast() {
         document.getElementById('customToast').classList.remove('active');
         location.reload(); 
