@@ -355,7 +355,7 @@ window.addMenu = () => {
     let n = document.getElementById('m-name').value;
     let p = document.getElementById('m-price').value;
     if(n && p) {
-        push(ref(db, 'menu_items'), { category: c, name: n, price: Number(p) });
+        push(ref(db, 'menu_items'), { cat: c, category: c, name: n, price: Number(p) });
         document.getElementById('m-name').value = '';
         document.getElementById('m-price').value = '';
     } else {
