@@ -245,11 +245,15 @@
                         <div style="background: rgba(255,0,60,0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid rgba(255,0,60,0.2);">
                             <h3 style="margin:0; color:#fff;">Total: ₹${sub}</h3>
                         </div>
-                        <button class="neon-btn" style="width:100%;" onclick="printBill('${id}', ${sub}, '${o.table}', '${typeBadge}')">🖨️ PRINT BILL</button>
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+    <button class="neon-btn" style="flex: 1; font-size: 14px;" onclick="printBill('${id}', ${sub}, '${o.table}', '${typeBadge}')">🖨️ PRINT</button>
+    <button class="neon-btn" style="flex: 1; font-size: 14px; border-color: #00ff66; color: #00ff66;" onclick="markAsPaid('${id}')">✅ PAID</button>
+</div>
+
                     </div>`;
                 }
             });
-        });
+        });let itemsHtml = \"\";
         
         // 2. Load Menu (FIXED FOR PARCEL TAB)
         onValue(ref(db, 'menu_items'), (snap) => {
@@ -309,46 +313,29 @@
 
     // --- PRINTER & BILLING LOGIC ---
     window.printBill = (id, sub, table, typeBadge) => {
-        let disc = document.getElementById('d-'+id).value;
-        if(disc > 12) disc = 12; if(disc < 0) disc = 0;
-        
-        let discAmt = Math.round(sub * disc / 100);
-        let final = Math.round(sub - discAmt);
-        
-        document.getElementById('b-time').innerText = new Date().toLocaleString();
-        document.getElementById('b-type').innerText = typeBadge;
-        document.getElementById('b-table').innerText = table.toUpperCase();
-        document.getElementById('b-items').innerHTML = `<div class="b-item"><span>Items as Ordered</span></div>`;
-        document.getElementById('b-sub').innerText = sub;
-        document.getElementById('b-disc').innerText = disc;
-        document.getElementById('b-disc-amt').innerText = discAmt;
-        document.getElementById('b-total').innerText = final;
-        
-        window.print();
-        
-        set(ref(db, `orders/${today}/${id}/status`), 'completed');
-        set(ref(db, `orders/${today}/${id}/finalTotal`), final);
-    };
+    // Bill ki details set karna
+    document.getElementById('b-time').innerText = new Date().toLocaleString();
+    document.getElementById('b-type').innerText = typeBadge || '';
+    document.getElementById('b-table').innerText = table ? table.toUpperCase() : '';
+    document.getElementById('b-sub').innerText = sub;
+    document.getElementById('b-total').innerText = sub;
+    
+    // Asli print command
+    window.print();
+};
 
-    // --- SALES LEDGER LOGIC ---
-    window.loadSales = () => {
-        let date = document.getElementById('s-date').value;
-        onValue(ref(db, 'orders/' + date), (snap) => {
-            let total = 0; let list = document.getElementById('sales-list'); list.innerHTML = '';
-            
-            snap.forEach(child => {
-                let o = child.val();
-                if(o.status === 'completed') {
-                    total += o.finalTotal || 0;
-                    list.innerHTML += `<div class="glass-card" style="border-left: 4px solid #00ff66; padding: 15px;">
-                        <h3 style="margin:0; text-align:left; color:#fff; text-shadow:none;">${o.table.toUpperCase()} <span style="float:right; color:#00ff66;">₹${o.finalTotal}</span></h3>
-                        <span style="font-size:12px; color:#aaa;">Phone: ${o.phone || 'N/A'}</span>
-                    </div>`;
-                }
-            });
-            document.getElementById('day-cash').innerText = total;
-        });
-    };
+window.markAsPaid = (id) => {
+    // Order ko complete karke screen se hatana
+    if(confirm("Payment mil gayi? Order complete kar dein?")) {
+        let d = new Date();
+        let tday = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
+        
+        set(ref(db, `orders/${tday}/${id}/status`), 'completed');
+        set(ref(db, `orders/${tday}/${id}/payment`), 'Paid');
+        
+        alert("Bhoot Bangla: Order Completed! 🦇");
+    }
+};
 
     // --- MENU MANAGER LOGIC ---
     window.addMenu = () => {
