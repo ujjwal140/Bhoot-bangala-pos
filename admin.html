@@ -215,8 +215,7 @@
 
     // --- MAIN ENGINE STARTER ---
     window.startSystem = function() {
-        // 1. Load Live Orders & ALARM SYSTEM
-                // 1. Load Live Orders (SAB ORDER DIKHAYEGA VERSION)
+                // 1. Load Live Orders (NO FILTER & BUTTONS FIXED)
         onValue(ref(db, 'orders/' + today), (snap) => {
             let list = document.getElementById('orders-list'); 
             list.innerHTML = '';
@@ -225,7 +224,6 @@
                 let o = child.val();
                 let id = child.key;
                 
-                // Completed orders ko chhod kar baaki sab dikhao
                 if(o.status !== 'completed'){ 
                     let typeBadge = (o.table && o.table.toUpperCase().includes('PARCEL')) ? '🥡 PARCEL' : '🍽️ DINE-IN';
                     
@@ -236,7 +234,7 @@
                         itemsHtml = `<li>${o.items || "No Items"}</li>`;
                     }
                     
-                    let sub = o.totalAmount || 0;
+                    let sub = o.totalAmount || o.finalTotal || 0;
                     
                     list.innerHTML += `<div class="glass-card">
                         <h2 style="margin:0; color:#ff003c;">${typeBadge} - ${o.table || 'Unknown'}</h2>
@@ -245,15 +243,14 @@
                         <div style="background: rgba(255,0,60,0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid rgba(255,0,60,0.2);">
                             <h3 style="margin:0; color:#fff;">Total: ₹${sub}</h3>
                         </div>
-                        <div style="display: flex; gap: 10px; margin-top: 10px;">
-    <button class="neon-btn" style="flex: 1; font-size: 14px;" onclick="printBill('${id}', ${sub}, '${o.table}', '${typeBadge}')">🖨️ PRINT</button>
-    <button class="neon-btn" style="flex: 1; font-size: 14px; border-color: #00ff66; color: #00ff66;" onclick="markAsPaid('${id}')">✅ PAID</button>
-</div>
-
+                        <div style="display: flex; gap: 10px; margin-top: 15px;">
+                            <button class="neon-btn" style="flex: 1; font-size: 14px; padding: 10px;" onclick="printBill('${id}', ${sub}, '${o.table}', '${typeBadge}')">🖨️ PRINT</button>
+                            <button class="neon-btn" style="flex: 1; font-size: 14px; padding: 10px; border-color: #00ff66; color: #00ff66;" onclick="markAsPaid('${id}')">✅ PAID</button>
+                        </div>
                     </div>`;
                 }
             });
-        });let itemsHtml = \"\";
+        });
         
         // 2. Load Menu (FIXED FOR PARCEL TAB)
         onValue(ref(db, 'menu_items'), (snap) => {
