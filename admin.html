@@ -242,10 +242,12 @@
                         <ul>${itemsHtml}</ul>
                         <div style="background: rgba(255,0,60,0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid rgba(255,0,60,0.2);">
                             <h3 style="margin:0; color:#fff;">Total: ₹${sub}</h3>
-                        </div>
                         <div style="display: flex; gap: 10px; margin-top: 15px;">
-                            <button class="neon-btn" style="flex: 1; font-size: 14px; padding: 10px;" onclick="printBill('${id}', ${sub}, '${o.table}', '${typeBadge}')">🖨️ PRINT</button>
-                            <button class="neon-btn" style="flex: 1; font-size: 14px; padding: 10px; border-color: #00ff66; color: #00ff66;" onclick="markAsPaid('${id}')">✅ PAID</button>
+    <button class="neon-btn" style="flex: 1; font-size: 14px; padding: 10px;" onclick="printBill('${id}', ${sub}, '${o.table}', '${typeBadge}')">🖨️ PRINT</button>
+    <button class="neon-btn" style="flex: 1; font-size: 14px; padding: 10px; border-color: #00ff66; color: #00ff66;" onclick="markAsPaid('${id}')">✅ PAID</button>
+    <button class="neon-btn" style="flex: 1; font-size: 14px; padding: 10px; border-color: #ff003c; color: #ff003c;" onclick="cancelOrder('${id}')">❌ CANCEL</button>
+</div>
+
                         </div>
                     </div>`;
                 }
@@ -327,6 +329,14 @@ window.markAsPaid = (id) => {
         set(ref(db, `orders/${tday}/${id}/payment`), 'Paid');
         
         // Yahan se maine location.reload() hata diya hai!
+    }
+};
+window.cancelOrder = (id) => {
+    if(confirm("Pakka order cancel karna hai? Ye delete ho jayega!")) {
+        let d = new Date();
+        let tday = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
+        
+        remove(ref(db, `orders/${tday}/${id}`));
     }
 };
 
