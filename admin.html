@@ -71,21 +71,37 @@
         ul { list-style-type: none; padding-left: 0; }
         ul li { background: rgba(255,255,255,0.03); margin: 5px 0; padding: 8px; border-radius: 4px; border-left: 2px solid var(--neon-red); }
 
-/* 🖨️ THERMAL PRINTER MAGIC (Hidden on screen) */
+/* 🖨️ THE FINAL BHOOT BANGLA PRINT FIX */
 #print-receipt { display: none; }
 @media print {
     body * { visibility: hidden; }
     #print-receipt, #print-receipt * { visibility: visible; }
     #print-receipt {
-        display: block; position: absolute; left: 0; top: 0; width: 100%;
-        background: #fff; color: #000 !important; font-family: monospace; padding: 0px; font-size: 14px; font-weight: 800 !important;
+        display: block; 
+        position: absolute; 
+        left: 0; 
+        top: 0; 
+        width: 100%;
+        background: #fff; 
+        color: #000 !important; 
+        font-family: 'Courier New', Courier, monospace; 
+        
+        /* 📏 Ye hai side gaps (Padding) ka jadoo */
+        padding: 0 15px; 
+        box-sizing: border-box; 
+        
+        /* 🖋️ Font size aur darkness settings */
+        font-size: 14px; 
+        font-weight: 900 !important; /* Ekdum gaadha print aayega */
+        line-height: 1.4;
     }
-    .b-line { border-bottom: 1px dashed #000; margin: 5px 0; }
-    .b-item { display: flex; justify-content: space-between; margin: 3px 0; }
-    h2, h3, p, span { color: #000 !important; font-weight: 800 !important; }
+    .b-line { border-bottom: 2px dashed #000; margin: 8px 0; }
+    .b-item { display: flex; justify-content: space-between; margin: 4px 0; }
+    h2, h3, p, span { color: #000 !important; font-weight: 900 !important; margin: 2px 0; }
     
-    @page { margin: 0; } /* Ye line auto-cut aur blank page rokti hai */
+    @page { margin: 0; } 
 }
+        
         
     </style>
 </head>
