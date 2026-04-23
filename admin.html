@@ -262,7 +262,8 @@
                         <div style="background: rgba(255,0,60,0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid rgba(255,0,60,0.2);">
                             <h3 style="margin:0; color:#fff;">Total: ₹${sub}</h3>
                         <div style="display: flex; gap: 10px; margin-top: 15px;">
-    <button class="neon-btn" style="flex: 1; font-size: 14px; padding: 10px;" onclick="printBill('${id}', ${sub}, '${o.table}', '${typeBadge}')">🖨️ PRINT</button>
+    <button class="neon-btn" style="flex: 1; font-size: 14px; padding: 10px;" onclick="printBill('${id}', '${sub}', '${o.table}', '${typeBadge}', '${encodeURIComponent(JSON.stringify(o.items))}')"> PRINT </button>
+
     <button class="neon-btn" style="flex: 1; font-size: 14px; padding: 10px; border-color: #00ff66; color: #00ff66;" onclick="markAsPaid('${id}')">✅ PAID</button>
     <button class="neon-btn" style="flex: 1; font-size: 14px; padding: 10px; border-color: #ff003c; color: #ff003c;" onclick="cancelOrder('${id}')">❌ CANCEL</button>
 </div>
@@ -316,27 +317,45 @@
     };
 
     window.submitParcel = () => {
-        if(parcelItems.length === 0) return alert('Pehle item toh select kar bhai!');
-        let phone = document.getElementById('p-phone').value || 'Counter';
-        
-        push(ref(db, 'orders/' + today), {
-            table: 'PARCEL', phone: phone, items: parcelItems, status: 'live'
-        });
-        
-        parcelItems = []; document.getElementById('p-total').innerText = 'Total: ₹0';
-        document.getElementById('p-phone').value = '';
-        alert('🥡 Parcel Bhej Diya Kitchen Mein!');
-        showTab('live');
-    };
+    if(parcelItems.length === 0) return alert('Pehle item toh select kar bhai!');
+    let phone = document.getElementById('p-phone').value || "Counter";
+    let fTotal = parcelItems.reduce((a, b) => a + (b.price * b.qty), 0); // Total calculate kiya
+
+    push(ref(db, 'orders/' + today), {
+        table: 'PARCEL',
+        phone: phone,
+        items: parcelItems,
+        totalAmount: fTotal, // 👈 Ye ab sahi naam se jayega
+        status: 'live',
+        time: new Date().toLocaleTimeString()
+    });
+
+    parcelItems = [];
+    document.getElementById('p-total').innerText = 'Total: ₹0';
+    document.getElementById('p-phone').value = '';
+    alert('📦 Parcel Kitchen mein bhej diya!');
+    showTab('live');
+};
+
 // --- PRINTER & BILLING LOGIC ---
-window.printBill = (id, sub, table, typeBadge) => {
+window.printBill = (id, sub, table, typeBadge, itemsJson) => {
+    const items = JSON.parse(decodeURIComponent(itemsJson)); // Items ko wapas read kiya
     document.getElementById('b-time').innerText = new Date().toLocaleString();
     document.getElementById('b-type').innerText = typeBadge || '';
     document.getElementById('b-table').innerText = table ? table.toUpperCase() : '';
     document.getElementById('b-sub').innerText = sub;
     document.getElementById('b-total').innerText = sub;
+
+    // 🟢 Items ko bill ke beech mein daalne ka loop
+    let itemsHtml = '';
+    items.forEach(item => {
+        itemsHtml += `<div class="b-item"><span>${item.name} x ${item.qty}</span><span>₹${item.price * item.qty}</span></div>`;
+    });
+    document.getElementById('b-items').innerHTML = itemsHtml;
+
     window.print();
 };
+
 
 window.markAsPaid = (id) => {
     if(confirm("Payment mil gayi? Order complete kar dein?")) {
