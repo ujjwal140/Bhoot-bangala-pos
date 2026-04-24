@@ -133,9 +133,12 @@
             return;
         }
 
-        const categories = {};
+                const categories = {};
         for(let id in data) {
-            const cat = data[id].category || data[id].cat || "Other";
+            // 🟢 MAGIC FIX: Category ko ek jaisa banane ke liye Uppercase aur Trim laga diya
+            let rawCat = data[id].category || data[id].cat || "Other";
+            const cat = rawCat.toUpperCase().trim(); 
+            
             if(!categories[cat]) categories[cat] = [];
             categories[cat].push(data[id]);
             itemPrices[data[id].name] = parseInt(data[id].price);
@@ -151,12 +154,13 @@
                             <p>₹${item.price}</p>
                         </div>
                         <button class="add-btn" onclick="addToCart('${item.name}')">ADD +</button>
-                    </div>`;
+                    </div>
+                `;
             });
             section += `</div>`;
             content.innerHTML += section;
         }
-    });
+
 
     function toggleDrawer(show) {
         document.getElementById('cartDrawer').classList.toggle('active', show);
